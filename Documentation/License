@@ -1,0 +1,25 @@
+
+LICENSE
+
+Permission is hereby granted, free of charge, to anyone
+obtaining a copy of this document and accompanying files,
+to do whatever they want with them without any restriction,
+including, but not limited to, copying, modification and redistribution.
+
+NO WARRANTY OF ANY KIND IS PROVIDED.
+
+
+As an exception, the following folder:
+    </Source/Tiles/*>
+
+is distributed under a Creative Commons Attribution-Share Alike 3.0 Unported License
+because it contains tilesets authored by Eric De Mund for the JIN chess program:
+    <http://ixian.com/chess/jin-piece-sets/>
+
+
+Finally, the TrueType font, Liberation Mono:
+    </Source/Font/LiberationMono-Regular.ttf>
+
+is distributed under a SIL Open Font License, which can be found here:
+    <http://scripts.sil.org/OFL>
+

@@ -1,2 +1,5 @@
+
 # Tileboard
-Easily draw high quality board game diagrams.
+
+Work in progress.
+
