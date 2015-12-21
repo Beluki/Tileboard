@@ -10,6 +10,7 @@ Easily draw high quality board game diagrams.
 import io
 import os
 import re
+import string
 import sys
 
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
@@ -92,6 +93,104 @@ def make_board(fen):
     return Board(rows, width, height)
 
 
+
+# Traversing boards:
+
+def walk_board(board):
+    """ Yields all the non-hole tiles in board. """
+    for row in board.rows:
+        for tile in row:
+            if tile != '0':
+                yield tile
+
+
+def walk_board_pieces(board):
+    """ Like "walk_board()", but blank squares are ignored. """
+    for tile in walk_board(board):
+        if tile != ' ':
+            yield tile
+
+
+def walk_rows(board):
+    """ Yields (tile, row, col), for all non-hole tiles in the board. """
+    for row in range(board.height):
+        for col in range(board.width):
+            tile = board.rows[row][col]
+            if tile != '0':
+                yield tile, row, col
+
+
+def walk_rows_pieces(board):
+    """ Like walk_rows(), but blank squares are ignored. """
+    for tile, row, col in walk_rows(board):
+        if tile != ' ':
+            yield tile, row, col
+
+
+# Loading piece images:
+
+def piece_to_filename(piece):
+    """ Convert a piece mnemonic into a filename to load. """
+    filename = piece.lower()
+
+    # some operating systems do not distinguish between uppercase
+    # and lowercase characters, therefore we prepend 'u' or 'l':
+    if piece in string.ascii_uppercase:
+        return 'u' + filename
+
+    if piece in string.ascii_lowercase:
+        return 'l' + filename
+
+    return filename
+
+
+
+def validate_image_sizes(images):
+    """ Ensure that a set of images are squares of equal size. """
+    size = None
+    last_image = None
+
+    for image in images:
+        width, height = image.size
+
+        # square?
+        if width != height:
+            raise TileboardError('Image width and height differ: {}'
+                .format(image.filename))
+
+        # it's the size we want?
+        if size is not None:
+            if width != size:
+                raise TileboardError('Image sizes do not match each other: {} - {}.'
+                    .format(last_image, image.filename))
+
+        size = width
+        last_image = image.filename
+
+    return size
+
+
+def load_piece_images(board, folder):
+    """ Load all the piece images required to draw a 'Board'."""
+    images = {}
+
+    for piece in walk_board_pieces(board):
+        if not piece in images:
+            filename = piece_to_filename(piece)
+            filepath = os.path.join(folder, filename)
+
+            try:
+                image = Image.open(filepath)
+                image.load()
+                images[piece] = image
+
+            except Exception as err:
+               raise TileboardError('Unable to load image: {} for: {}: {}'
+                    .format(filepath, piece, err))
+
+    return images
+
+
 # Parser:
 
 def make_parser():
@@ -101,6 +200,11 @@ def make_parser():
         usage = 'Tileboard.py position filepath [option [options ...]]',
         epilog  = 'example: Tileboard.py rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR chess.png'
     )
+
+    # pieces:
+    parser.add_argument("--tileset",
+    help = "where to look for piece tiles",
+    default = 'Tiles/merida/42', dest = 'tileset', metavar = 'folder', type = str)
 
     # required:
     parser.add_argument('position',
@@ -124,6 +228,8 @@ def main():
     try:
         # load resources:
         board = make_board(options.position)
+        images = load_piece_images(board, options.tileset)
+        validate_image_sizes(images.values())
 
     except TileboardError as err:
         errln('{}'.format(err))
