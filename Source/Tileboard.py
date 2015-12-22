@@ -39,7 +39,7 @@ except ImportError:
     sys.exit(1)
 
 
-# All exceptions in tileboard are of this type:
+# All exceptions in Tileboard are of this type:
 
 class TileboardError(Exception):
     pass
@@ -50,9 +50,9 @@ class TileboardError(Exception):
 class Board(object):
     """
     Represented as a list of rows, where each row is a string
-    of characters of variable length.
+    of characters of *constant* length.
 
-    Do not use this constructor, use "make_board()" instead.
+    Do not use this constructor, use "fen_make_board(position)" instead.
     """
     def __init__(self, rows, width, height):
         self.rows = rows
@@ -60,13 +60,13 @@ class Board(object):
         self.height = height
 
 
-# Fen position parsing:
+# Parsing FEN positions:
 
-def validate_fen(fen):
+def fen_validate(position):
     """ Check that a FEN position has rows and contains valid characters. """
     has_rows = False
 
-    for character in fen:
+    for character in position:
        if not character == '/':
             has_rows = True
 
@@ -74,24 +74,24 @@ def validate_fen(fen):
         raise TileboardError('Empty FEN position.')
 
 
-def expand_numbers(fen):
+def fen_expand_numbers(position):
     """ Replace numbers from 1..9 with as much spaces as the number value. """
-    return re.sub('[1-9]', lambda match: ' ' * int(match.group(0)), fen)
+    return re.sub('[1-9]', lambda match: ' ' * int(match.group(0)), position)
 
 
-def make_board(fen):
+def fen_make_board(position):
     """ Create a Board from a FEN position. """
-    validate_fen(fen)
+    fen_validate(position)
 
-    rows = expand_numbers(fen).split('/')
+    rows = fen_expand_numbers(position).split('/')
     width = max(map(len, rows))
     height = len(rows)
 
-    # fill with holes to make sure all the rows have the same length:
+    # fill with zeros (holes) to make sure that all the rows
+    # have the same length:
     rows = [row.ljust(width, '0') for row in rows]
 
     return Board(rows, width, height)
-
 
 
 # Traversing boards:
@@ -127,7 +127,7 @@ def walk_rows_pieces(board):
             yield tile, row, col
 
 
-# Loading piece images:
+# Loading tilesets:
 
 def piece_to_filename(piece):
     """ Convert a piece mnemonic into a filename to load. """
@@ -144,11 +144,10 @@ def piece_to_filename(piece):
     return filename
 
 
-
-def validate_image_sizes(images):
+def validate_tile_sizes(images):
     """ Ensure that a set of images are squares of equal size. """
-    size = None
-    last_image = None
+    last_image_size = None
+    last_image_filename = None
 
     for image in images:
         width, height = image.size
@@ -158,20 +157,20 @@ def validate_image_sizes(images):
             raise TileboardError('Image width and height differ: {}'
                 .format(image.filename))
 
-        # it's the size we want?
-        if size is not None:
-            if width != size:
+        # the size we want?
+        if last_image_size is not None:
+            if (width != last_image_size) or (height != last_image_size):
                 raise TileboardError('Image sizes do not match each other: {} - {}.'
-                    .format(last_image, image.filename))
+                    .format(last_image_filename, image.filename))
 
-        size = width
-        last_image = image.filename
+        last_image_size = width
+        last_image_filename = image.filename
 
-    return size
+    return last_image_size
 
 
-def load_piece_images(board, folder):
-    """ Load all the piece images required to draw a 'Board'."""
+def load_tileset(board, folder):
+    """ Load all the piece images required to draw 'board'."""
     images = {}
 
     for piece in walk_board_pieces(board):
@@ -201,7 +200,11 @@ def make_parser():
         epilog  = 'example: Tileboard.py rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR chess.png'
     )
 
-    # pieces:
+    # tileset:
+    parser.add_argument("--tilesize",
+        help = "board square size",
+        default = 42, dest = 'tilesize', metavar = 'int', type = int)
+
     parser.add_argument("--tileset",
     help = "where to look for piece tiles",
     default = 'Tiles/merida/42', dest = 'tileset', metavar = 'folder', type = str)
@@ -227,9 +230,18 @@ def main():
 
     try:
         # load resources:
-        board = make_board(options.position)
-        images = load_piece_images(board, options.tileset)
-        validate_image_sizes(images.values())
+        board = fen_make_board(options.position)
+        tileset = load_tileset(board, options.tileset)
+
+        # determine the base tile size:
+        tilesize = validate_tile_sizes(tileset.values())
+
+        if tilesize is None:
+            tilesize = options.tilesize
+
+        # board sizes:
+        width = tilesize * board.width
+        height = tilesize * board.height
 
     except TileboardError as err:
         errln('{}'.format(err))
