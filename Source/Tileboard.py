@@ -31,7 +31,7 @@ def errln(line):
 # Non-builtin imports:
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageFont
 
 except ImportError:
     errln('Tileboard requires the following modules:')
@@ -92,6 +92,49 @@ def fen_make_board(position):
     rows = [row.ljust(width, '0') for row in rows]
 
     return Board(rows, width, height)
+
+
+# Base 26 conversions:
+# http://en.wikipedia.org/wiki/Hexavigesimal
+
+def to_base26(number):
+    """ Convert a zero-based integer to a (lowercase) base-26 string. """
+    s = []
+    first_letter = True
+
+    while True:
+        remainder = number % 26
+
+        if not first_letter and number < 25:
+            remainder -= 1
+
+        s[0:0] = chr(97 + remainder)
+        first_letter = False
+
+        number = (number - remainder) // 26
+        if number == 0:
+            return ''.join(s)
+
+
+def from_base26(string):
+    """
+    Convert a base-26 string to a zero-based integer.
+    The input string may be either lowercase or uppercase.
+    """
+    string = string.lower()
+
+    size = len(string)
+    number = ord(string[0]) - 97
+
+    if size > 1:
+        if number < 25:
+            number += 1
+
+        for i in range(1, size):
+            number *= 26
+            number += ord(string[i]) - 97
+
+    return number
 
 
 # Traversing boards:
@@ -190,6 +233,32 @@ def load_tileset(board, folder):
     return images
 
 
+# Calculating sizes:
+
+def calculate_border_size(board, tilesize, font):
+    """ Calculate the minimum border size needed to draw the border text. """
+    border_size = tilesize // 2
+
+    max_col_text = to_base26(board.width)
+    max_row_text = str(board.height)
+
+    max_col_text_width, _ = font.getsize(max_col_text)
+    max_row_text_width, _ = font.getsize(max_row_text)
+
+    # include 10px padding:
+    max_col_text_width += 10
+    max_row_text_width += 10
+
+    return max(border_size, max_col_text_width, max_row_text_width)
+
+
+def calculate_border_font_size(tilesize):
+    """ Calculate ideal border font size. """
+    # this could be more clever, right now we just have a minimum
+    # readable size (12px) and scale to the tile size:
+    return max(tilesize // 3, 12)
+
+
 # Parser:
 
 def make_parser():
@@ -200,23 +269,52 @@ def make_parser():
         epilog  = 'example: Tileboard.py rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR chess.png'
     )
 
-    # tileset:
-    parser.add_argument("--tilesize",
-        help = "board square size",
-        default = 42, dest = 'tilesize', metavar = 'int', type = int)
-
-    parser.add_argument("--tileset",
-    help = "where to look for piece tiles",
-    default = 'Tiles/merida/42', dest = 'tileset', metavar = 'folder', type = str)
-
     # required:
     parser.add_argument('position',
-        help = "board position in FEN notation",
+        help = 'board position in FEN notation',
         type = str)
 
     parser.add_argument('filepath',
-        help = "output file, including extension",
+        help = 'output file, including extension',
         type = str)
+
+
+    # optional
+    # border options:
+    border_options = parser.add_argument_group('border options')
+
+    border_options.add_argument('--border-color',
+        help = 'color for the border background',
+        default = '#FFFFFF', dest = 'border_color', metavar = 'color', type = str)
+
+    border_options.add_argument('--border-disable',
+        help ='do not draw the coordinates border',
+        action = 'store_const', dest = 'border_disable', const = True)
+
+    border_options.add_argument('--border-uppercase',
+        help = 'use uppercase letters in the border',
+        action = 'store_const', dest = 'border_uppercase', const = True)
+
+    border_options.add_argument('--border-font',
+        help = 'font to use for border letters and numbers',
+        default = 'Font/LiberationMono-Regular.ttf', dest = 'border_font', metavar = 'file.ttf', type = str)
+
+    border_options.add_argument('--border-font-color',
+        help = 'color to use for border letters and numbers',
+        default = '#000000', dest = 'border_font_color', metavar = 'color', type = str)
+
+
+    # optional
+    # tile options:
+    tile_options = parser.add_argument_group('tile options')
+
+    tile_options.add_argument('--tilesize',
+        help = 'board square size',
+        default = 42, dest = 'tilesize', metavar = 'int', type = int)
+
+    tile_options.add_argument('--tileset',
+        help ='where to look for piece tiles',
+        default = 'Tiles/merida/42', dest = 'tileset', metavar = 'folder', type = str)
 
     return parser
 
@@ -236,12 +334,26 @@ def main():
         # determine the base tile size:
         tilesize = validate_tile_sizes(tileset.values())
 
+        # no tiles on board, fallback to the tilesize:
         if tilesize is None:
             tilesize = options.tilesize
 
-        # board sizes:
-        width = tilesize * board.width
-        height = tilesize * board.height
+        # calculate the image size:
+        image_width = tilesize * board.width
+        image_height = tilesize * board.height
+
+        # add the border and the outline:
+        border_size = 0
+        outline_size = 0
+
+        # calculate and add the border size:
+        if not options.border_disable:
+            border_font_size = calculate_border_font_size(tilesize)
+            border_font = ImageFont.truetype(options.border_font, border_font_size)
+            border_size = calculate_border_size(board, tilesize, border_font)
+
+            image_width += (border_size * 2)
+            image_height += (border_size * 2)
 
     except TileboardError as err:
         errln('{}'.format(err))
