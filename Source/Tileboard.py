@@ -7,7 +7,6 @@ Easily draw high quality board game diagrams.
 """
 
 
-import io
 import os
 import re
 import string
@@ -31,18 +30,12 @@ def errln(line):
 # Non-builtin imports:
 
 try:
-    from PIL import Image, ImageFont
+    from PIL import Image, ImageDraw, ImageFont
 
 except ImportError:
     errln('Tileboard requires the following modules:')
     errln('Pillow 3.0.0+ - <https://pypi.python.org/pypi/Pillow>')
     sys.exit(1)
-
-
-# All exceptions in Tileboard are of this type:
-
-class TileboardError(Exception):
-    pass
 
 
 # Board representation:
@@ -71,7 +64,7 @@ def fen_validate(position):
             has_rows = True
 
     if not has_rows:
-        raise TileboardError('Empty FEN position.')
+        raise ValueError('Empty FEN position.')
 
 
 def fen_expand_numbers(position):
@@ -197,13 +190,13 @@ def validate_tile_sizes(images):
 
         # square?
         if width != height:
-            raise TileboardError('Image width and height differ: {}'
+            raise ValueError('Image width and height differ: {}'
                 .format(image.filename))
 
         # the size we want?
         if last_image_size is not None:
             if (width != last_image_size) or (height != last_image_size):
-                raise TileboardError('Image sizes do not match each other: {} - {}.'
+                raise ValueError('Image sizes do not match each other: {} - {}.'
                     .format(last_image_filename, image.filename))
 
         last_image_size = width
@@ -227,7 +220,7 @@ def load_tileset(board, folder):
                 images[piece] = image
 
             except Exception as err:
-               raise TileboardError('Unable to load image: {} for: {}: {}'
+               raise ValueError('Unable to load image: {} for: {}: {}'
                     .format(filepath, piece, err))
 
     return images
@@ -259,6 +252,74 @@ def calculate_border_font_size(tilesize):
     return max(tilesize // 3, 12)
 
 
+def calculate_outline_size(tilesize):
+    """ Calculate ideal outline size. """
+    # so that big tilesizes get a bigger outline:
+    return max(tilesize // 100, 1)
+
+
+def make_base_image(image_width, image_height, border_color, outline_color, outline_size):
+    """ Create the target image. """
+
+    # the initial image already contains the outline color:
+    target = Image.new('RGBA', (image_width, image_height), color = outline_color)
+    draw = ImageDraw.Draw(target)
+
+    # draw the border:
+    # the second point is just outside the drawn rectangle, thus -1 on x2, y2:
+    x1 = outline_size
+    y1 = outline_size
+    x2 = image_width - outline_size - 1
+    y2 = image_height - outline_size - 1
+
+    draw.rectangle([x1, y1, x2, y2], fill = border_color)
+    del draw
+
+    return target
+
+
+# Drawing:
+
+class BoardDraw(object):
+    """
+    Encapsulates board drawing in a single class that holds
+    the common shared parameters.
+    """
+    def __init__(self, target, board, tilesize):
+        self.target = target
+        self.board = board
+        self.tilesize = tilesize
+
+    def draw_checkerboard(self, xy, color0, color1, color2):
+        """ Draw a checkerboard pattern. """
+        xoffset, yoffset = xy
+        draw = ImageDraw.Draw(self.target)
+
+        # draw the background (holes) as a single rectangle:
+        bx1 = xoffset
+        by1 = yoffset
+        bx2 = bx1 + (self.tilesize * self.board.width) - 1
+        by2 = by1 + (self.tilesize * self.board.height) - 1
+
+        draw.rectangle([bx1, by1, bx2, by2], fill = color0)
+
+        # draw the checkerboard:
+        for tile, row, col in walk_rows(self.board):
+            x1 = xoffset + (col * self.tilesize)
+            y1 = yoffset + (row * self.tilesize)
+            x2 = x1 + self.tilesize - 1
+            y2 = y1 + self.tilesize - 1
+
+            if (col % 2) == (row % 2):
+                color = color1
+            else:
+                color = color2
+
+            draw.rectangle([x1, y1, x2, y2], color)
+
+        del draw
+
+
 # Parser:
 
 def make_parser():
@@ -278,6 +339,21 @@ def make_parser():
         help = 'output file, including extension',
         type = str)
 
+    # optional:
+    # checkerboard options:
+    checkerboard_options = parser.add_argument_group('checkerboard options')
+
+    checkerboard_options.add_argument("--color0",
+        help = "color for the holes in the board",
+        default = '#EEEEEE', dest = 'color0', metavar = 'color', type = str)
+
+    checkerboard_options.add_argument("--color1",
+        help = "first color for the checkerboard pattern",
+        default = '#FFCE9E', dest = 'color1', metavar = 'color', type = str)
+
+    checkerboard_options.add_argument("--color2",
+        help = "second color for the checkerboard pattern",
+        default = '#D18B47', dest = 'color2', metavar = 'color', type = str)
 
     # optional
     # border options:
@@ -302,6 +378,19 @@ def make_parser():
     border_options.add_argument('--border-font-color',
         help = 'color to use for border letters and numbers',
         default = '#000000', dest = 'border_font_color', metavar = 'color', type = str)
+
+
+    # optional
+    # outline options:
+    outline_options = parser.add_argument_group('outline options')
+
+    outline_options.add_argument("--outline-color",
+        help = "color for the outer outline",
+        default = '#000000', dest = 'outline_color', metavar = 'color', type = str)
+
+    outline_options.add_argument("--outline-disable",
+        help = "don't draw an outer outline",
+        action = 'store_const', dest = 'outline_disable', const = True)
 
 
     # optional
@@ -355,7 +444,29 @@ def main():
             image_width += (border_size * 2)
             image_height += (border_size * 2)
 
-    except TileboardError as err:
+        # calculate and add the outline size:
+        if not options.outline_disable:
+            outline_size = calculate_outline_size(tilesize)
+
+            image_width += (outline_size * 2)
+            image_height += (outline_size * 2)
+
+        # calculate the drawing offsets:
+        board_offset = (outline_size + border_size, outline_size + border_size)
+        border_offset = (outline_size, outline_size)
+
+        # create the initial image:
+        target = make_base_image(image_width, image_height, options.border_color, options.outline_color, outline_size)
+
+        # and draw on it:
+        draw = BoardDraw(target, board, tilesize)
+
+        draw.draw_checkerboard(board_offset, options.color0, options.color1, options.color2)
+
+        # save to disk:
+        target.save(options.filepath)
+
+    except Exception as err:
         errln('{}'.format(err))
         status = 1
 
