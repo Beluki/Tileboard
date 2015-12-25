@@ -45,7 +45,7 @@ class Board(object):
     Represented as a list of rows, where each row is a string
     of characters of *constant* length.
 
-    Do not use this constructor, use "fen_make_board(position)" instead.
+    Do not use this constructor, use: "fen_make_board(position)" instead.
     """
     def __init__(self, rows, width, height):
         self.rows = rows
@@ -83,7 +83,6 @@ def fen_make_board(position):
     # fill with zeros (holes) to make sure that all the rows
     # have the same length:
     rows = [row.ljust(width, '0') for row in rows]
-
     return Board(rows, width, height)
 
 
@@ -226,7 +225,27 @@ def load_tileset(board, folder):
     return images
 
 
+# Loading fonts:
+
+def load_font(filepath, size):
+    """
+    Load a truetype font.
+    """
+    try:
+        return ImageFont.truetype(filepath, size)
+
+    except Exception as err:
+        raise ValueError('Unable to load font: {}'.format(filepath))
+
+
 # Calculating sizes:
+
+def calculate_border_font_size(tilesize):
+    """ Calculate ideal border font size. """
+    # this could be more clever, right now we just have a minimum
+    # readable size (12px) and scale to the tile size:
+    return max(tilesize // 3, 12)
+
 
 def calculate_border_size(board, tilesize, font):
     """ Calculate the minimum border size needed to draw the border text. """
@@ -245,13 +264,6 @@ def calculate_border_size(board, tilesize, font):
     return max(border_size, max_col_text_width, max_row_text_width)
 
 
-def calculate_border_font_size(tilesize):
-    """ Calculate ideal border font size. """
-    # this could be more clever, right now we just have a minimum
-    # readable size (12px) and scale to the tile size:
-    return max(tilesize // 3, 12)
-
-
 def calculate_outline_size(tilesize):
     """ Calculate ideal outline size. """
     # so that big tilesizes get a bigger outline:
@@ -262,11 +274,10 @@ def make_base_image(image_width, image_height, border_color, outline_color, outl
     """ Create the target image. """
 
     # the initial image already contains the outline color:
-    target = Image.new('RGBA', (image_width, image_height), color = outline_color)
-    draw = ImageDraw.Draw(target)
+    image = Image.new('RGBA', (image_width, image_height), color = outline_color)
+    draw = ImageDraw.Draw(image)
 
     # draw the border:
-    # the second point is just outside the drawn rectangle, thus -1 on x2, y2:
     x1 = outline_size
     y1 = outline_size
     x2 = image_width - outline_size - 1
@@ -275,7 +286,7 @@ def make_base_image(image_width, image_height, border_color, outline_color, outl
     draw.rectangle([x1, y1, x2, y2], fill = border_color)
     del draw
 
-    return target
+    return image
 
 
 # Drawing:
@@ -285,23 +296,23 @@ class BoardDraw(object):
     Encapsulates board drawing in a single class that holds
     the common shared parameters.
     """
-    def __init__(self, target, board, tilesize):
-        self.target = target
+    def __init__(self, image, board, tilesize):
+        self.image = image
         self.board = board
         self.tilesize = tilesize
 
     def draw_checkerboard(self, xy, color0, color1, color2):
         """ Draw a checkerboard pattern. """
         xoffset, yoffset = xy
-        draw = ImageDraw.Draw(self.target)
+        draw = ImageDraw.Draw(self.image)
 
         # draw the background (holes) as a single rectangle:
-        bx1 = xoffset
-        by1 = yoffset
-        bx2 = bx1 + (self.tilesize * self.board.width) - 1
-        by2 = by1 + (self.tilesize * self.board.height) - 1
+        x1 = xoffset
+        y1 = yoffset
+        x2 = x1 + (self.tilesize * self.board.width) - 1
+        y2 = y1 + (self.tilesize * self.board.height) - 1
 
-        draw.rectangle([bx1, by1, bx2, by2], fill = color0)
+        draw.rectangle([x1, y1, x2, y2], fill = color0)
 
         # draw the checkerboard:
         for tile, row, col in walk_rows(self.board):
@@ -339,21 +350,6 @@ def make_parser():
         help = 'output file, including extension',
         type = str)
 
-    # optional:
-    # checkerboard options:
-    checkerboard_options = parser.add_argument_group('checkerboard options')
-
-    checkerboard_options.add_argument("--color0",
-        help = "color for the holes in the board",
-        default = '#EEEEEE', dest = 'color0', metavar = 'color', type = str)
-
-    checkerboard_options.add_argument("--color1",
-        help = "first color for the checkerboard pattern",
-        default = '#FFCE9E', dest = 'color1', metavar = 'color', type = str)
-
-    checkerboard_options.add_argument("--color2",
-        help = "second color for the checkerboard pattern",
-        default = '#D18B47', dest = 'color2', metavar = 'color', type = str)
 
     # optional
     # border options:
@@ -361,23 +357,48 @@ def make_parser():
 
     border_options.add_argument('--border-color',
         help = 'color for the border background',
-        default = '#FFFFFF', dest = 'border_color', metavar = 'color', type = str)
+        default = '#FFFFFF', dest = 'border_color', metavar = 'color',
+        type = str)
 
     border_options.add_argument('--border-disable',
         help ='do not draw the coordinates border',
-        action = 'store_const', dest = 'border_disable', const = True)
+        action = 'store_const', dest = 'border_disable',
+        const = True)
 
     border_options.add_argument('--border-uppercase',
         help = 'use uppercase letters in the border',
-        action = 'store_const', dest = 'border_uppercase', const = True)
+        action = 'store_const', dest = 'border_uppercase',
+        const = True)
 
     border_options.add_argument('--border-font',
         help = 'font to use for border letters and numbers',
-        default = 'Font/LiberationMono-Regular.ttf', dest = 'border_font', metavar = 'file.ttf', type = str)
+        default = 'Font/LiberationMono-Regular.ttf', dest = 'border_font', metavar = 'file.ttf',
+        type = str)
 
     border_options.add_argument('--border-font-color',
         help = 'color to use for border letters and numbers',
-        default = '#000000', dest = 'border_font_color', metavar = 'color', type = str)
+        default = '#000000', dest = 'border_font_color', metavar = 'color',
+        type = str)
+
+
+    # optional:
+    # checkerboard options:
+    checkerboard_options = parser.add_argument_group('checkerboard options')
+
+    checkerboard_options.add_argument("--color0",
+        help = "color for the holes in the board",
+        default = '#EEEEEE', dest = 'color0', metavar = 'color',
+        type = str)
+
+    checkerboard_options.add_argument("--color1",
+        help = "first color for the checkerboard pattern",
+        default = '#FFCE9E', dest = 'color1', metavar = 'color',
+        type = str)
+
+    checkerboard_options.add_argument("--color2",
+        help = "second color for the checkerboard pattern",
+        default = '#D18B47', dest = 'color2', metavar = 'color',
+        type = str)
 
 
     # optional
@@ -386,11 +407,13 @@ def make_parser():
 
     outline_options.add_argument("--outline-color",
         help = "color for the outer outline",
-        default = '#000000', dest = 'outline_color', metavar = 'color', type = str)
+        default = '#000000', dest = 'outline_color', metavar = 'color',
+        type = str)
 
     outline_options.add_argument("--outline-disable",
         help = "don't draw an outer outline",
-        action = 'store_const', dest = 'outline_disable', const = True)
+        action = 'store_const', dest = 'outline_disable',
+        const = True)
 
 
     # optional
@@ -399,11 +422,13 @@ def make_parser():
 
     tile_options.add_argument('--tilesize',
         help = 'board square size',
-        default = 42, dest = 'tilesize', metavar = 'int', type = int)
+        default = 42, dest = 'tilesize', metavar = 'int',
+        type = int)
 
     tile_options.add_argument('--tileset',
         help ='where to look for piece tiles',
-        default = 'Tiles/merida/42', dest = 'tileset', metavar = 'folder', type = str)
+        default = 'Tiles/merida/42', dest = 'tileset', metavar = 'folder',
+        type = str)
 
     return parser
 
@@ -431,14 +456,14 @@ def main():
         image_width = tilesize * board.width
         image_height = tilesize * board.height
 
-        # add the border and the outline:
+        # add the border and the outline to the image size:
         border_size = 0
         outline_size = 0
 
         # calculate and add the border size:
         if not options.border_disable:
             border_font_size = calculate_border_font_size(tilesize)
-            border_font = ImageFont.truetype(options.border_font, border_font_size)
+            border_font = load_font(options.border_font, border_font_size)
             border_size = calculate_border_size(board, tilesize, border_font)
 
             image_width += (border_size * 2)
@@ -452,19 +477,19 @@ def main():
             image_height += (outline_size * 2)
 
         # calculate the drawing offsets:
-        board_offset = (outline_size + border_size, outline_size + border_size)
+        outline_offset = (0, 0)
         border_offset = (outline_size, outline_size)
+        board_offset = (outline_size + border_size, outline_size + border_size)
 
-        # create the initial image:
-        target = make_base_image(image_width, image_height, options.border_color, options.outline_color, outline_size)
+        # create the target image:
+        image = make_base_image(image_width, image_height, options.border_color, options.outline_color, outline_size)
 
         # and draw on it:
-        draw = BoardDraw(target, board, tilesize)
-
+        draw = BoardDraw(image, board, tilesize)
         draw.draw_checkerboard(board_offset, options.color0, options.color1, options.color2)
 
         # save to disk:
-        target.save(options.filepath)
+        image.save(options.filepath)
 
     except Exception as err:
         errln('{}'.format(err))
