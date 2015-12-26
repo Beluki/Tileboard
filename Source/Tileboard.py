@@ -38,52 +38,45 @@ except ImportError:
     sys.exit(1)
 
 
+# All the exceptions Tileboard raises are of this type:
+
+class TileboardError(Exception):
+    pass
+
+
 # Board representation:
 
 class Board(object):
     """
-    Represented as a list of rows, where each row is a string
-    of characters of *constant* length.
-
-    Do not use this constructor, use: "fen_make_board(position)" instead.
+    Create a Board from a FEN position.
     """
-    def __init__(self, rows, width, height):
-        self.rows = rows
-        self.width = width
-        self.height = height
+    def __init__(self, position):
+        self.validate_position(position)
 
+        self.rows = self.expand_position_numbers(position).split('/')
+        self.width = max(map(len, self.rows))
+        self.height = len(self.rows)
 
-# Parsing FEN positions:
+        # fill with zeros (holes) to make sure that all the rows
+        # have the same length:
+        self.rows = [row.ljust(self.width, '0') for row in self.rows]
 
-def fen_validate(position):
-    """ Check that a FEN position has rows and contains valid characters. """
-    has_rows = False
+    def validate_position(self, position):
+        """
+        Check that a FEN position has rows and contains valid characters.
+        """
+        has_rows = False
 
-    for character in position:
-       if not character == '/':
-            has_rows = True
+        for character in position:
+           if not character == '/':
+                has_rows = True
 
-    if not has_rows:
-        raise ValueError('Empty FEN position.')
+        if not has_rows:
+            raise TileboardError('Empty FEN position.')
 
-
-def fen_expand_numbers(position):
-    """ Replace numbers from 1..9 with as much spaces as the number value. """
-    return re.sub('[1-9]', lambda match: ' ' * int(match.group(0)), position)
-
-
-def fen_make_board(position):
-    """ Create a Board from a FEN position. """
-    fen_validate(position)
-
-    rows = fen_expand_numbers(position).split('/')
-    width = max(map(len, rows))
-    height = len(rows)
-
-    # fill with zeros (holes) to make sure that all the rows
-    # have the same length:
-    rows = [row.ljust(width, '0') for row in rows]
-    return Board(rows, width, height)
+    def expand_position_numbers(self, position):
+        """ Replace numbers from 1..9 with as much spaces as the number value. """
+        return re.sub('[1-9]', lambda match: ' ' * int(match.group(0)), position)
 
 
 # Base 26 conversions:
@@ -189,13 +182,13 @@ def validate_tile_sizes(images):
 
         # square?
         if width != height:
-            raise ValueError('Image width and height differ: {}'
+            raise TileboardError('Image width and height differ: {}'
                 .format(image.filename))
 
         # the size we want?
         if last_image_size is not None:
             if (width != last_image_size) or (height != last_image_size):
-                raise ValueError('Image sizes do not match each other: {} - {}.'
+                raise TileboardError('Image sizes do not match each other: {} - {}.'
                     .format(last_image_filename, image.filename))
 
         last_image_size = width
@@ -219,7 +212,7 @@ def load_tileset(board, folder):
                 images[piece] = image
 
             except Exception as err:
-               raise ValueError('Unable to load image: {} for: {}: {}'
+               raise TileboardError('Unable to load image: {} for: {}: {}'
                     .format(filepath, piece, err))
 
     return images
@@ -235,7 +228,7 @@ def load_font(filepath, size):
         return ImageFont.truetype(filepath, size)
 
     except Exception as err:
-        raise ValueError('Unable to load font: {}'.format(filepath))
+        raise TileboardError('Unable to load font: {}'.format(filepath))
 
 
 # Calculating sizes:
@@ -270,23 +263,31 @@ def calculate_outline_size(tilesize):
     return max(tilesize // 100, 1)
 
 
-def make_base_image(image_width, image_height, border_color, outline_color, outline_size):
-    """ Create the target image. """
+# Drawing helpers:
 
-    # the initial image already contains the outline color:
-    image = Image.new('RGBA', (image_width, image_height), color = outline_color)
+def draw_rectangle_outline(image, x1, y1, x2, y2, width, color):
+    """
+    Draw a rectangle outline.
+    """
     draw = ImageDraw.Draw(image)
 
-    # draw the border:
-    x1 = outline_size
-    y1 = outline_size
-    x2 = image_width - outline_size - 1
-    y2 = image_height - outline_size - 1
+    # top left -> bottom left
+    rect = (x1, y1, x1 + width, y2)
+    draw.rectangle(rect, fill = color)
 
-    draw.rectangle([x1, y1, x2, y2], fill = border_color)
+    # top left -> top right
+    rect = (x1, y1, x2, y1 + width)
+    draw.rectangle(rect, fill = color)
+
+    # top right -> bottom right
+    rect = (x2, y1, x2 - width, y2)
+    draw.rectangle(rect, fill = color)
+
+    # bottom left -> bottom right
+    rect = (x1, y2, x2, y2 - width)
+    draw.rectangle(rect, fill = color)
+
     del draw
-
-    return image
 
 
 # Drawing:
@@ -329,6 +330,19 @@ class BoardDraw(object):
             draw.rectangle([x1, y1, x2, y2], color)
 
         del draw
+
+    def draw_pieces(self, xy, tileset):
+        """ Draw all the board pieces. """
+        xoffset, yoffset = xy
+
+        for piece, row, col in walk_rows_pieces(self.board):
+            tile = tileset[piece]
+            alpha = tile.split()[3]
+
+            x1 = xoffset + (col * self.tilesize)
+            y1 = yoffset + (row * self.tilesize)
+
+            self.image.paste(tile, (x1, y1), alpha)
 
 
 # Parser:
@@ -442,7 +456,7 @@ def main():
 
     try:
         # load resources:
-        board = fen_make_board(options.position)
+        board = Board(options.position)
         tileset = load_tileset(board, options.tileset)
 
         # determine the base tile size:
@@ -457,8 +471,15 @@ def main():
         image_height = tilesize * board.height
 
         # add the border and the outline to the image size:
-        border_size = 0
         outline_size = 0
+        border_size = 0
+
+        # calculate and add the outer outline size:
+        if not options.outline_disable:
+            outline_size = calculate_outline_size(tilesize)
+
+            image_width += (outline_size * 2)
+            image_height += (outline_size * 2)
 
         # calculate and add the border size:
         if not options.border_disable:
@@ -469,26 +490,40 @@ def main():
             image_width += (border_size * 2)
             image_height += (border_size * 2)
 
-        # calculate and add the outline size:
-        if not options.outline_disable:
-            outline_size = calculate_outline_size(tilesize)
-
-            image_width += (outline_size * 2)
-            image_height += (outline_size * 2)
-
         # calculate the drawing offsets:
         outline_offset = (0, 0)
         border_offset = (outline_size, outline_size)
         board_offset = (outline_size + border_size, outline_size + border_size)
 
-        # create the target image:
-        image = make_base_image(image_width, image_height, options.border_color, options.outline_color, outline_size)
+        # create the base image, transparent:
+        image = Image.new('RGBA', (image_width, image_height))
 
-        # and draw on it:
+        # start drawing:
+
+        # outline:
+        if not options.outline_disable:
+            draw_rectangle_outline(image,
+                0,
+                0,
+                image_width - 1,
+                image_height - 1,
+                outline_size,
+                options.outline_color)
+
+        # border:
+        if not options.border_disable:
+            draw_rectangle_outline(image,
+                outline_size,
+                outline_size,
+                image_width - outline_size - 1,
+                image_height - outline_size - 1,
+                border_size,
+                options.border_color)
+
         draw = BoardDraw(image, board, tilesize)
         draw.draw_checkerboard(board_offset, options.color0, options.color1, options.color2)
+        draw.draw_pieces(board_offset, tileset)
 
-        # save to disk:
         image.save(options.filepath)
 
     except Exception as err:
