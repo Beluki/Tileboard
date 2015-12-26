@@ -416,17 +416,32 @@ def make_parser():
 
 
     # optional
-    # outline options:
-    outline_options = parser.add_argument_group('outline options')
+    # outer outline options:
+    outer_outline_options = parser.add_argument_group('outer outline options')
 
-    outline_options.add_argument("--outline-color",
+    outer_outline_options.add_argument("--outer-outline-color",
         help = "color for the outer outline",
-        default = '#000000', dest = 'outline_color', metavar = 'color',
+        default = '#000000', dest = 'outer_outline_color', metavar = 'color',
         type = str)
 
-    outline_options.add_argument("--outline-disable",
+    outer_outline_options.add_argument("--outer-outline-disable",
         help = "don't draw an outer outline",
-        action = 'store_const', dest = 'outline_disable',
+        action = 'store_const', dest = 'outer_outline_disable',
+        const = True)
+
+
+    # optional
+    # inner outline options:
+    inner_outline_options = parser.add_argument_group('inner outline options')
+
+    inner_outline_options.add_argument("--inner-outline-color",
+        help = "color for the inner outline",
+        default = '#000000', dest = 'inner_outline_color', metavar = 'color',
+        type = str)
+
+    inner_outline_options.add_argument("--inner-outline-disable",
+        help = "don't draw an inner outline",
+        action = 'store_const', dest = 'inner_outline_disable',
         const = True)
 
 
@@ -470,16 +485,17 @@ def main():
         image_width = tilesize * board.width
         image_height = tilesize * board.height
 
-        # add the border and the outline to the image size:
-        outline_size = 0
+        # add the border and the outlines to the image size:
+        outer_outline_size = 0
         border_size = 0
+        inner_outline_size = 0
 
         # calculate and add the outer outline size:
-        if not options.outline_disable:
-            outline_size = calculate_outline_size(tilesize)
+        if not options.outer_outline_disable:
+            outer_outline_size = calculate_outline_size(tilesize)
 
-            image_width += (outline_size * 2)
-            image_height += (outline_size * 2)
+            image_width += (outer_outline_size * 2)
+            image_height += (outer_outline_size * 2)
 
         # calculate and add the border size:
         if not options.border_disable:
@@ -490,36 +506,55 @@ def main():
             image_width += (border_size * 2)
             image_height += (border_size * 2)
 
+        # calculate and add the inner outline size:
+        if not options.inner_outline_disable:
+            inner_outline_size = calculate_outline_size(tilesize)
+
+            image_width += (inner_outline_size * 2)
+            image_height += (inner_outline_size * 2)
+
         # calculate the drawing offsets:
-        outline_offset = (0, 0)
-        border_offset = (outline_size, outline_size)
-        board_offset = (outline_size + border_size, outline_size + border_size)
+        outer_outline_offset = (0, 0)
+        border_offset = (outer_outline_size, outer_outline_size)
+        inner_outline_offset = (outer_outline_size + border_size, outer_outline_size + border_size)
+        board_offset = (outer_outline_size + border_size + inner_outline_size, outer_outline_size + border_size + inner_outline_size)
 
         # create the base image, transparent:
         image = Image.new('RGBA', (image_width, image_height))
 
         # start drawing:
 
-        # outline:
-        if not options.outline_disable:
+        # outer outline:
+        if not options.outer_outline_disable:
             draw_rectangle_outline(image,
                 0,
                 0,
                 image_width - 1,
                 image_height - 1,
-                outline_size,
-                options.outline_color)
+                outer_outline_size - 1,
+                options.outer_outline_color)
 
         # border:
         if not options.border_disable:
             draw_rectangle_outline(image,
-                outline_size,
-                outline_size,
-                image_width - outline_size - 1,
-                image_height - outline_size - 1,
-                border_size,
+                outer_outline_size,
+                outer_outline_size,
+                image_width - outer_outline_size - 1,
+                image_height - outer_outline_size - 1,
+                border_size - 1,
                 options.border_color)
 
+        # inner outline:
+        if not options.inner_outline_disable:
+            draw_rectangle_outline(image,
+                outer_outline_size + border_size,
+                outer_outline_size + border_size,
+                image_width - outer_outline_size - border_size - 1,
+                image_height - outer_outline_size - border_size - 1,
+                inner_outline_size - 1,
+                options.inner_outline_color)
+
+        # board content:
         draw = BoardDraw(image, board, tilesize)
         draw.draw_checkerboard(board_offset, options.color0, options.color1, options.color2)
         draw.draw_pieces(board_offset, tileset)
