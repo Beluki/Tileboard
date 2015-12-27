@@ -263,7 +263,7 @@ def calculate_outline_size(tilesize):
     return max(tilesize // 100, 1)
 
 
-# Drawing helpers:
+# Drawing:
 
 def draw_rectangle_outline(image, x1, y1, x2, y2, width, color):
     """
@@ -272,77 +272,77 @@ def draw_rectangle_outline(image, x1, y1, x2, y2, width, color):
     draw = ImageDraw.Draw(image)
 
     # top left -> bottom left
-    rect = (x1, y1, x1 + width, y2)
+    rect = [x1, y1, x1 + width, y2]
     draw.rectangle(rect, fill = color)
 
     # top left -> top right
-    rect = (x1, y1, x2, y1 + width)
+    rect = [x1, y1, x2, y1 + width]
     draw.rectangle(rect, fill = color)
 
     # top right -> bottom right
-    rect = (x2, y1, x2 - width, y2)
+    rect = [x2, y1, x2 - width, y2]
     draw.rectangle(rect, fill = color)
 
     # bottom left -> bottom right
-    rect = (x1, y2, x2, y2 - width)
+    rect = [x1, y2, x2, y2 - width]
     draw.rectangle(rect, fill = color)
 
     del draw
 
 
-# Drawing:
-
-class BoardDraw(object):
+def draw_checkerboard_holes(image, xy, board, tilesize, color0):
     """
-    Encapsulates board drawing in a single class that holds
-    the common shared parameters.
+    Draw the background (holes) as a single rectangle.
     """
-    def __init__(self, image, board, tilesize):
-        self.image = image
-        self.board = board
-        self.tilesize = tilesize
+    draw = ImageDraw.Draw(image)
+    xoffset, yoffset = xy
 
-    def draw_checkerboard(self, xy, color0, color1, color2):
-        """ Draw a checkerboard pattern. """
-        xoffset, yoffset = xy
-        draw = ImageDraw.Draw(self.image)
+    x1 = xoffset
+    y1 = yoffset
+    x2 = x1 + (tilesize * board.width) - 1
+    y2 = y1 + (tilesize * board.height) - 1
 
-        # draw the background (holes) as a single rectangle:
-        x1 = xoffset
-        y1 = yoffset
-        x2 = x1 + (self.tilesize * self.board.width) - 1
-        y2 = y1 + (self.tilesize * self.board.height) - 1
+    draw.rectangle([x1, y1, x2, y2], fill = color0)
+    del draw
 
-        draw.rectangle([x1, y1, x2, y2], fill = color0)
 
-        # draw the checkerboard:
-        for tile, row, col in walk_rows(self.board):
-            x1 = xoffset + (col * self.tilesize)
-            y1 = yoffset + (row * self.tilesize)
-            x2 = x1 + self.tilesize - 1
-            y2 = y1 + self.tilesize - 1
+def draw_checkerboard_pattern(image, xy, board, tilesize, color1, color2):
+    """
+    Draw a checkerboard pattern.
+    """
+    draw = ImageDraw.Draw(image)
+    xoffset, yoffset = xy
 
-            if (col % 2) == (row % 2):
-                color = color1
-            else:
-                color = color2
+    for tile, row, col in walk_rows(board):
+        x1 = xoffset + (col * tilesize)
+        y1 = yoffset + (row * tilesize)
+        x2 = x1 + tilesize - 1
+        y2 = y1 + tilesize - 1
 
-            draw.rectangle([x1, y1, x2, y2], color)
+        if (col % 2) == (row % 2):
+            color = color1
+        else:
+            color = color2
 
-        del draw
+        draw.rectangle([x1, y1, x2, y2], color)
 
-    def draw_pieces(self, xy, tileset):
-        """ Draw all the board pieces. """
-        xoffset, yoffset = xy
+    del draw
 
-        for piece, row, col in walk_rows_pieces(self.board):
-            tile = tileset[piece]
-            alpha = tile.split()[3]
 
-            x1 = xoffset + (col * self.tilesize)
-            y1 = yoffset + (row * self.tilesize)
+def draw_pieces(image, xy, board, tilesize, tileset):
+    """
+    Draw all the board pieces.
+    """
+    xoffset, yoffset = xy
 
-            self.image.paste(tile, (x1, y1), alpha)
+    for piece, row, col in walk_rows_pieces(board):
+        tile = tileset[piece]
+        alpha = tile.split()[3]
+
+        x1 = xoffset + (col * tilesize)
+        y1 = yoffset + (row * tilesize)
+
+        image.paste(tile, (x1, y1), alpha)
 
 
 # Parser:
@@ -399,20 +399,30 @@ def make_parser():
     # checkerboard options:
     checkerboard_options = parser.add_argument_group('checkerboard options')
 
-    checkerboard_options.add_argument("--color0",
-        help = "color for the holes in the board",
-        default = '#EEEEEE', dest = 'color0', metavar = 'color',
-        type = str)
-
-    checkerboard_options.add_argument("--color1",
+    checkerboard_options.add_argument("--checkerboard-color1",
         help = "first color for the checkerboard pattern",
-        default = '#FFCE9E', dest = 'color1', metavar = 'color',
+        default = '#FFCE9E', dest = 'checkerboard_color1', metavar = 'color',
         type = str)
 
-    checkerboard_options.add_argument("--color2",
+    checkerboard_options.add_argument("--checkerboard-color2",
         help = "second color for the checkerboard pattern",
-        default = '#D18B47', dest = 'color2', metavar = 'color',
+        default = '#D18B47', dest = 'checkerboard_color2', metavar = 'color',
         type = str)
+
+    checkerboard_options.add_argument('--checkerboard-disable',
+        help ='do not draw a checkerboard pattern',
+        action = 'store_const', dest = 'checkerboard_disable',
+        const = True)
+
+    checkerboard_options.add_argument("--checkerboard-holes-color",
+        help = "color for the holes in the board",
+        default = '#EEEEEE', dest = 'checkerboard_holes_color', metavar = 'color',
+        type = str)
+
+    checkerboard_options.add_argument('--checkerboard-holes-disable',
+        help ='do not draw the checkerboard holes (keep them transparent)',
+        action = 'store_const', dest = 'checkerboard_holes_disable',
+        const = True)
 
 
     # optional
@@ -447,17 +457,22 @@ def make_parser():
 
     # optional
     # tile options:
-    tile_options = parser.add_argument_group('tile options')
+    tileset_options = parser.add_argument_group('tileset options')
 
-    tile_options.add_argument('--tilesize',
+    tileset_options.add_argument('--tileset-folder',
+        help ='where to look for piece tiles',
+        default = 'Tiles/merida/42', dest = 'tileset_folder', metavar = 'folder',
+        type = str)
+
+    tileset_options.add_argument('--tileset-size',
         help = 'board square size',
-        default = 42, dest = 'tilesize', metavar = 'int',
+        default = 42, dest = 'tileset_size', metavar = 'int',
         type = int)
 
-    tile_options.add_argument('--tileset',
-        help ='where to look for piece tiles',
-        default = 'Tiles/merida/42', dest = 'tileset', metavar = 'folder',
-        type = str)
+    tileset_options.add_argument("--tileset-disable",
+        help = "don't draw tiles",
+        action = 'store_const', dest = 'tileset_disable',
+        const = True)
 
     return parser
 
@@ -472,14 +487,14 @@ def main():
     try:
         # load resources:
         board = Board(options.position)
-        tileset = load_tileset(board, options.tileset)
+        tileset = load_tileset(board, options.tileset_folder)
 
         # determine the base tile size:
         tilesize = validate_tile_sizes(tileset.values())
 
-        # no tiles on board, fallback to the tilesize:
+        # no tiles on board, fallback to the tilesize specified in options:
         if tilesize is None:
-            tilesize = options.tilesize
+            tilesize = options.tileset_size
 
         # calculate the image size:
         image_width = tilesize * board.width
@@ -554,11 +569,32 @@ def main():
                 inner_outline_size - 1,
                 options.inner_outline_color)
 
-        # board content:
-        draw = BoardDraw(image, board, tilesize)
-        draw.draw_checkerboard(board_offset, options.color0, options.color1, options.color2)
-        draw.draw_pieces(board_offset, tileset)
+        # checkerboard holes:
+        if not options.checkerboard_holes_disable:
+            draw_checkerboard_holes(image,
+                board_offset,
+                board,
+                tilesize,
+                options.checkerboard_holes_color)
 
+        # checkerboard:
+        if not options.checkerboard_disable:
+            draw_checkerboard_pattern(image,
+                board_offset,
+                board,
+                tilesize,
+                options.checkerboard_color1,
+                options.checkerboard_color2)
+
+        # pieces:
+        if not options.tileset_disable:
+            draw_pieces(image,
+                board_offset,
+                board,
+                tilesize,
+                tileset)
+
+        # save to disk:
         image.save(options.filepath)
 
     except Exception as err:
