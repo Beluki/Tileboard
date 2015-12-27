@@ -228,7 +228,7 @@ def load_font(filepath, size):
         return ImageFont.truetype(filepath, size)
 
     except Exception as err:
-        raise TileboardError('Unable to load font: {}'.format(filepath))
+        raise TileboardError('Unable to load font: {}: {}'.format(filepath, err))
 
 
 # Calculating sizes:
@@ -286,6 +286,70 @@ def draw_rectangle_outline(image, x1, y1, x2, y2, width, color):
     # bottom left -> bottom right
     rect = [x1, y2, x2, y2 - width]
     draw.rectangle(rect, fill = color)
+
+    del draw
+
+
+def draw_border_letters(image, xy, board, tilesize, border_size, border_font, border_font_size, border_font_color, uppercase, inner_outline_size):
+    """
+    Draw the border letters on top/bottom.
+    """
+    draw = ImageDraw.Draw(image)
+    xoffset, yoffset = xy
+
+    # Y remains constant, precalculate:
+    ycenter = (border_size // 2) - (border_font_size // 2)
+
+    y1 = yoffset + ycenter
+    y2 = yoffset + ycenter + border_size + inner_outline_size + (tilesize * board.height) + inner_outline_size
+
+    # point xoffset to the center of the first square with a letter:
+    xoffset += border_size + inner_outline_size + (tilesize // 2)
+
+    # generate rows text:
+    rows = map(to_base26, range(board.width))
+
+    if uppercase:
+        rows = [row.upper() for row in rows]
+
+    # draw:
+    for index, text in enumerate(rows):
+        fontwidth, _ = border_font.getsize(text)
+
+        x = xoffset + (tilesize * index) - (fontwidth // 2)
+
+        draw.text((x, y1), text, font = border_font, fill = border_font_color)
+        draw.text((x, y2), text, font = border_font, fill = border_font_color)
+
+    del draw
+
+
+def draw_border_numbers(image, xy, board, tilesize, border_size, border_font, border_font_size, border_font_color, inner_outline_size):
+    """
+    Draw the border numbers on left/right.
+    """
+    xoffset, yoffset = xy
+    draw = ImageDraw.Draw(image)
+
+    # point x1 and x2 to the centers of the borders:
+    x1offset = xoffset + (border_size // 2)
+    x2offset = xoffset + border_size + inner_outline_size + (tilesize * board.width) + inner_outline_size + (border_size // 2)
+
+    # point y1 to the center of the first square with a number:
+    y1offset = yoffset + border_size + inner_outline_size + (tilesize // 2)
+
+    cols = map(str, range(board.height, 0, -1))
+
+    for index, text in enumerate(cols):
+        fontwidth, _ = border_font.getsize(text)
+
+        x1 = x1offset - (fontwidth // 2)
+        x2 = x2offset - (fontwidth // 2)
+
+        y1 = y1offset + (tilesize * index) - (border_font_size // 2)
+
+        draw.text((x1, y1), text, font = border_font, fill = border_font_color)
+        draw.text((x2, y1), text, font = border_font, fill = border_font_color)
 
     del draw
 
@@ -558,6 +622,27 @@ def main():
                 image_height - outer_outline_size - 1,
                 border_size - 1,
                 options.border_color)
+
+            draw_border_letters(image,
+                border_offset,
+                board,
+                tilesize,
+                border_size,
+                border_font,
+                border_font_size,
+                options.border_font_color,
+                options.border_uppercase,
+                inner_outline_size)
+
+            draw_border_numbers(image,
+                border_offset,
+                board,
+                tilesize,
+                border_size,
+                border_font,
+                border_font_size,
+                options.border_font_color,
+                inner_outline_size)
 
         # inner outline:
         if not options.inner_outline_disable:
