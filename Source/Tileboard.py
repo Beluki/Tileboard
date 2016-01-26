@@ -159,6 +159,28 @@ def from_base26(string):
     return number
 
 
+# Border text generation:
+
+def generate_border_rows_text(board, uppercase):
+    """
+    Return a list of words representing border letter coordinates.
+    (e.g. ['a', 'b', 'c', 'd' ..., 'z', 'aa', 'ab', ...])
+    """
+    if uppercase:
+        return [to_base26(number).upper() for number in range(board.width)]
+    else:
+        return [to_base26(number).lower() for number in range(board.width)]
+
+
+def generate_border_cols_text(board):
+    """
+    Return a list of words representing border number coordinates.
+    (e.g. ['11', '10', ... '4', '3', '2', '1'])
+    in reverse order.
+    """
+    return [str(number) for number in range(board.height, 0, -1)]
+
+
 # Loading tilesets:
 
 def piece_to_filename(piece):
@@ -269,7 +291,8 @@ def calculate_border_size(board, tilesize, font):
     return max(border_size, max_col_text_width, max_row_text_width)
 
 
-# Drawing:
+# Generic drawing helpers:
+# (no board specific information)
 
 def draw_rectangle_outline(image, x1, y1, x2, y2, width, color):
     """
@@ -296,32 +319,72 @@ def draw_rectangle_outline(image, x1, y1, x2, y2, width, color):
     del draw
 
 
-def draw_checkerboard_holes(image, xy, board, tilesize, color):
+def draw_horizontal_words(image, x, y, words, spacing, font, font_size, font_color):
     """
-    Draw the background (holes) as a single rectangle.
+    Draw a series of words horizontally with a constant spacing.
     """
     draw = ImageDraw.Draw(image)
-    xoffset, yoffset = xy
 
-    x1 = xoffset
-    y1 = yoffset
-    x2 = x1 + (tilesize * board.width) - 1
-    y2 = y1 + (tilesize * board.height) - 1
+    # draw:
+    for index, word in enumerate(words):
+        fontwidth, _ = font.getsize(word)
 
-    draw.rectangle([x1, y1, x2, y2], fill = color)
+        x1 = x + (spacing * index) - (fontwidth // 2)
+        y1 = y
+
+        draw.text((x1, y1), word, font = font, fill = font_color)
+
     del draw
 
 
-def draw_checkerboard_pattern(image, xy, board, tilesize, color1, color2):
+def draw_vertical_words(image, x, y, words, spacing, font, font_size, font_color):
+    """
+    Draw a series of words vertically with a constant spacing.
+    """
+    draw = ImageDraw.Draw(image)
+
+    # draw:
+    for index, word in enumerate(words):
+        fontwidth, _ = font.getsize(word)
+
+        x1 = x - (fontwidth // 2)
+        y1 = y + (spacing * index) - (font_size // 2)
+
+        draw.text((x1, y1), word, font = font, fill = font_color)
+
+    del draw
+
+
+# Specific drawing helpers for the board itself:
+# (have board specific information)
+
+def draw_checkerboard_holes(image, x, y, board, tilesize, color):
+    """
+    Draw the checkerboard holes.
+    """
+    draw = ImageDraw.Draw(image)
+
+    for tile, row, col in walk_board_rows(board, ignore_blanks = True, ignore_holes = False):
+        x1 = x + (col * tilesize)
+        y1 = y + (row * tilesize)
+        x2 = x1 + tilesize - 1
+        y2 = y1 + tilesize - 1
+
+        if tile == '0':
+            draw.rectangle([x1, y1, x2, y2], color)
+
+    del draw
+
+
+def draw_checkerboard_pattern(image, x, y, board, tilesize, color1, color2):
     """
     Draw the checkerboard pattern.
     """
     draw = ImageDraw.Draw(image)
-    xoffset, yoffset = xy
 
     for tile, row, col in walk_board_rows(board, ignore_blanks = False, ignore_holes = True):
-        x1 = xoffset + (col * tilesize)
-        y1 = yoffset + (row * tilesize)
+        x1 = x + (col * tilesize)
+        y1 = y + (row * tilesize)
         x2 = x1 + tilesize - 1
         y2 = y1 + tilesize - 1
 
@@ -333,85 +396,16 @@ def draw_checkerboard_pattern(image, xy, board, tilesize, color1, color2):
     del draw
 
 
-def draw_border_letters(image, xy, board, tilesize, border_size, border_font, border_font_size, border_font_color, uppercase, inner_outline_size):
-    """
-    Draw the border letters on top/bottom.
-    """
-    draw = ImageDraw.Draw(image)
-    xoffset, yoffset = xy
-
-    # center of the border (the xy offset is the border_offset):
-    y_center = (border_size // 2) - (border_font_size // 2)
-
-    # Y coordinate remains constant for both rows, precalculate:
-    y1 = yoffset + y_center
-    y2 = yoffset + border_size + inner_outline_size + (tilesize * board.height) + inner_outline_size + y_center
-
-    # point xoffset to the center of the first square:
-    xoffset += border_size + inner_outline_size + (tilesize // 2)
-
-    # generate rows text:
-    rows = [to_base26(n) for n in range(board.width)]
-
-    if uppercase:
-        rows = [row.upper() for row in rows]
-
-    # draw:
-    for index, text in enumerate(rows):
-        fontwidth, _ = border_font.getsize(text)
-
-        x = xoffset + (tilesize * index) - (fontwidth // 2)
-
-        draw.text((x, y1), text, font = border_font, fill = border_font_color)
-        draw.text((x, y2), text, font = border_font, fill = border_font_color)
-
-    del draw
-
-
-def draw_border_numbers(image, xy, board, tilesize, border_size, border_font, border_font_size, border_font_color, inner_outline_size):
-    """
-    Draw the border numbers on left/right.
-    """
-    draw = ImageDraw.Draw(image)
-    xoffset, yoffset = xy
-
-    # point x1 and x2 to the centers of the borders:
-    x1offset = xoffset + (border_size // 2)
-    x2offset = xoffset + border_size + inner_outline_size + (tilesize * board.width) + inner_outline_size + (border_size // 2)
-
-    # point y1 to the center of the first square with a number:
-    y1offset = yoffset + border_size + inner_outline_size + (tilesize // 2)
-
-    # generate columns text:
-    cols = [str(n) for n in range(board.height, 0, -1)]
-
-    # draw:
-    for index, text in enumerate(cols):
-        fontwidth, _ = border_font.getsize(text)
-
-        x1 = x1offset - (fontwidth // 2)
-        x2 = x2offset - (fontwidth // 2)
-
-        y = y1offset + (tilesize * index) - (border_font_size // 2)
-
-        draw.text((x1, y), text, font = border_font, fill = border_font_color)
-        draw.text((x2, y), text, font = border_font, fill = border_font_color)
-
-    del draw
-
-
-def draw_pieces(image, xy, board, tilesize, tileset):
+def draw_pieces(image, x, y, board, tilesize, tileset):
     """
     Draw all the board pieces.
     """
-    xoffset, yoffset = xy
-
     for piece, row, col in walk_board_rows(board, ignore_blanks = True, ignore_holes = True):
         tile = tileset[piece]
         alpha = tile.split()[3]
 
-        x1 = xoffset + (col * tilesize)
-        y1 = yoffset + (row * tilesize)
+        x1 = x + (col * tilesize)
+        y1 = y + (row * tilesize)
 
         image.paste(tile, (x1, y1), alpha)
 
@@ -557,6 +551,7 @@ def main():
     status = 0
 
     try:
+        # load resources:
         board = Board(options.position)
         tileset = load_tileset(board, options.tileset_folder)
 
@@ -596,12 +591,6 @@ def main():
             image_width += (inner_outline_size * 2)
             image_height += (inner_outline_size * 2)
 
-        # calculate the drawing offsets:
-        outer_outline_offset = (0, 0)
-        border_offset = (outer_outline_size, outer_outline_size)
-        inner_outline_offset = (outer_outline_size + border_size, outer_outline_size + border_size)
-        board_offset = (outer_outline_size + border_size + inner_outline_size, outer_outline_size + border_size + inner_outline_size)
-
 
         # create the base image, transparent
         # and start drawing:
@@ -610,80 +599,112 @@ def main():
         # outer outline:
         if not options.outer_outline_disable:
             draw_rectangle_outline(image,
-                                   x1 = 0,
-                                   y1 = 0,
-                                   x2 = image_width - 1,
-                                   y2 = image_height - 1,
-                                width = outer_outline_size - 1,
-                                color = options.outer_outline_color)
+                                      x1 = 0,
+                                      y1 = 0,
+                                      x2 = image.width - 1,
+                                      y2 = image.height - 1,
+                                   width = outer_outline_size - 1,
+                                   color = options.outer_outline_color)
 
         # border:
         if not options.border_disable:
             draw_rectangle_outline(image,
-                                   x1 = outer_outline_size,
-                                   y1 = outer_outline_size,
-                                   x2 = image_width - outer_outline_size - 1,
-                                   y2 = image_height - outer_outline_size - 1,
-                                width = border_size - 1,
-                                color = options.border_color)
+                                      x1 = outer_outline_size,
+                                      y1 = outer_outline_size,
+                                      x2 = image.width - outer_outline_size - 1,
+                                      y2 = image.height - outer_outline_size - 1,
+                                   width = border_size - 1,
+                                   color = options.border_color)
 
-            # top/bottom coordinates:
-            draw_border_letters(image,
-                                xy = border_offset,
-                             board = board,
-                          tilesize = tilesize,
-                       border_size = border_size,
-                       border_font = border_font,
-                  border_font_size = border_font_size,
-                 border_font_color = options.border_font_color,
-                         uppercase = options.border_uppercase,
-                inner_outline_size = inner_outline_size)
+            # border text, top row:
+            top_row_x = outer_outline_size + border_size + inner_outline_size + (tilesize // 2)
+            top_row_y = outer_outline_size + (border_size // 2) - (border_font_size // 2)
 
-            # left/right coordinates:
-            draw_border_numbers(image,
-                                xy = border_offset,
-                             board = board,
-                          tilesize = tilesize,
-                       border_size = border_size,
-                       border_font = border_font,
-                  border_font_size = border_font_size,
-                 border_font_color = options.border_font_color,
-                inner_outline_size = inner_outline_size)
+            draw_horizontal_words(image,
+                                      x = top_row_x,
+                                      y = top_row_y,
+                                  words = generate_border_rows_text(board, options.border_uppercase),
+                                spacing = tilesize,
+                                   font = border_font,
+                              font_size = border_font_size,
+                             font_color = options.border_font_color)
+
+            # border text, bottom row:
+            bottom_row_x = outer_outline_size + border_size + inner_outline_size + (tilesize // 2)
+            bottom_row_y = outer_outline_size + border_size + inner_outline_size + (tilesize * board.height) + inner_outline_size + (border_size // 2) - (border_font_size // 2)
+
+            draw_horizontal_words(image,
+                                      x = bottom_row_x,
+                                      y = bottom_row_y,
+                                  words = generate_border_rows_text(board, options.border_uppercase),
+                                spacing = tilesize,
+                                   font = border_font,
+                              font_size = border_font_size,
+                             font_color = options.border_font_color)
+
+            # border text, left column:
+            left_col_x = outer_outline_size + (border_size // 2)
+            left_col_y = outer_outline_size + border_size + inner_outline_size + (tilesize // 2)
+
+            draw_vertical_words(image,
+                                    x = left_col_x,
+                                    y = left_col_y,
+                                words = generate_border_cols_text(board),
+                              spacing = tilesize,
+                                 font = border_font,
+                            font_size = border_font_size,
+                           font_color = options.border_font_color)
+
+            # border text, right column:
+            right_col_x = outer_outline_size + border_size + inner_outline_size + (tilesize * board.width) + inner_outline_size + (border_size // 2)
+            right_col_y = outer_outline_size + border_size + inner_outline_size + (tilesize // 2)
+
+            draw_vertical_words(image,
+                                    x = right_col_x,
+                                    y = right_col_y,
+                                words = generate_border_cols_text(board),
+                              spacing = tilesize,
+                                 font = border_font,
+                            font_size = border_font_size,
+                           font_color = options.border_font_color)
 
         # inner outline:
         if not options.inner_outline_disable:
             draw_rectangle_outline(image,
-                                   x1 = outer_outline_size + border_size,
-                                   y1 = outer_outline_size + border_size,
-                                   x2 = image_width - outer_outline_size - border_size - 1,
-                                   y2 = image_height - outer_outline_size - border_size - 1,
-                                width = inner_outline_size - 1,
-                                color = options.inner_outline_color)
+                                      x1 = outer_outline_size + border_size,
+                                      y1 = outer_outline_size + border_size,
+                                      x2 = image.width - outer_outline_size - border_size - 1,
+                                      y2 = image.height - outer_outline_size - border_size - 1,
+                                   width = inner_outline_size - 1,
+                                   color = options.inner_outline_color)
 
         # checkerboard holes:
-        if not options.checkerboard_holes_disable:
+        if not options.checkerboard_disable and not options.checkerboard_holes_disable:
             draw_checkerboard_holes(image,
-                                    xy = board_offset,
-                                 board = board,
-                              tilesize = tilesize,
-                                 color = options.checkerboard_color0)
+                                        x = outer_outline_size + border_size + inner_outline_size,
+                                        y = outer_outline_size + border_size + inner_outline_size,
+                                    board = board,
+                                 tilesize = tilesize,
+                                    color = options.checkerboard_color0)
 
         # checkerboard pattern:
         if not options.checkerboard_disable:
             draw_checkerboard_pattern(image,
-                                      xy = board_offset,
-                                   board = board,
-                                tilesize = tilesize,
-                                  color1 = options.checkerboard_color1,
-                                  color2 = options.checkerboard_color2)
+                                          x = outer_outline_size + border_size + inner_outline_size,
+                                          y = outer_outline_size + border_size + inner_outline_size,
+                                      board = board,
+                                   tilesize = tilesize,
+                                     color1 = options.checkerboard_color1,
+                                     color2 = options.checkerboard_color2)
 
-        # pieces:
+        # tileset:
         if not options.tileset_disable:
             draw_pieces(image,
-                        xy = board_offset,
-                     board = board,
-                  tilesize = tilesize,
-                   tileset = tileset)
+                            x = outer_outline_size + border_size + inner_outline_size,
+                            y = outer_outline_size + border_size + inner_outline_size,
+                        board = board,
+                     tilesize = tilesize,
+                      tileset = tileset)
 
         # save to disk:
         image.save(options.filepath)
