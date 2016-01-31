@@ -185,16 +185,24 @@ def generate_border_cols_text(board):
 
 def piece_to_filename(piece):
     """ Convert a piece mnemonic into a filename to load. """
+
+    # pieces in the FEN notation can be uppercase or lowercase, e.g.:
+    # r - black rook
+    # R - white rook
+
+    # some operating systems such as Windows have case-insensitive filenames,
+    # therefore we prepend 'u' (upper) or 'l' (lower) to each filename to indicate the case
+    # when it makes sense:
     filename = piece.lower()
 
-    # some operating systems do not distinguish between uppercase
-    # and lowercase filenames, therefore we prepend 'u' or 'l':
-    if piece in string.ascii_uppercase:
+    if piece.isupper():
         return 'u' + filename
 
-    if piece in string.ascii_lowercase:
+    if piece.islower():
         return 'l' + filename
 
+    # many characters (such as '#', numbers, other unicode) will return False for both
+    # .isupper() and .islower():
     return filename
 
 
@@ -402,12 +410,12 @@ def draw_pieces(image, x, y, board, tilesize, tileset):
     """
     for piece, row, col in walk_board_rows(board, ignore_blanks = True, ignore_holes = True):
         tile = tileset[piece]
-        alpha = tile.split()[3]
+        mask = tile.split()[3]
 
         x1 = x + (col * tilesize)
         y1 = y + (row * tilesize)
 
-        image.paste(tile, (x1, y1), alpha)
+        image.paste(tile, (x1, y1), mask)
 
 
 # Parser:
