@@ -285,7 +285,7 @@ def load_tileset(board, folder):
 def generate_tile(tilesize, drawing_function, color, factor = 4):
     """
     Create a tile of 'factor' times the requested 'tilesize'
-    draw on it using 'function' and return an antialiased resized copy.
+    draw on it using 'drawing_function' and return an antialiased resized copy.
     """
     size = tilesize * factor
     tile = Image.new('RGBA', (size, size))
@@ -479,7 +479,6 @@ def draw_marks(image, x, y, board, tilesize, coords, color, drawing_function):
     mask = tile.split()[3]
 
     for col, row in parse_positions(coords, board):
-
         x1 = x + (col * tilesize)
         y1 = y + (row * tilesize)
 
