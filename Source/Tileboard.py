@@ -10,7 +10,6 @@ Easily draw high quality board game diagrams.
 import argparse
 import os
 import re
-import string
 import sys
 
 from argparse import ArgumentParser
@@ -179,6 +178,34 @@ def generate_border_cols_text(board):
     in reverse order.
     """
     return [str(number) for number in range(board.height, 0, -1)]
+
+
+# Algebraic position parsing:
+
+def parse_position(position, board):
+    """
+    Read an algebraic position string such as: 'A1' or: 'a1'
+    and return (X, Y) coordinates from top to bottom on board.
+    """
+    match = re.search('^([A-Z]+)([0-9]+)$', position, re.IGNORECASE)
+
+    if not match or match.lastindex != 2:
+        raise TileboardError('Invalid position: {}'.format(position))
+
+    col, row = match.groups()
+
+    x = from_base26(col)
+    y = board.height - int(row)
+
+    if (x < 0) or (x > board.width - 1) or (y < 0) or (y > board.height - 1):
+        raise TileboardError('Position out of board: {}'.format(position))
+
+    return x, y
+
+
+def parse_positions(positions, board):
+    """ Read a list of positions. """
+    return [parse_position(position, board) for position in positions]
 
 
 # Loading tilesets:
@@ -530,6 +557,46 @@ def make_parser():
 
 
     # optional
+    # crosses options:
+    crosses_options = parser.add_argument_group('crosses options')
+
+    crosses_options.add_argument('--crosses',
+        help = 'mark square coordinates with crosses',
+        default = [], dest = 'crosses', metavar = 'coord',
+        nargs = '+', type = str)
+
+    crosses_options.add_argument('--crosses-color',
+        help = 'color for the cross markers',
+        default = '#000000', dest = 'crosses_color', metavar = 'color',
+        type = str)
+
+    crosses_options.add_argument('--crosses-disable',
+        help ='do not draw the cross markers',
+        action = 'store_const', dest = 'crosses_disable',
+        const = True)
+
+
+    # optional
+    # dots options:
+    dots_options = parser.add_argument_group('dots options')
+
+    dots_options.add_argument('--dots',
+        help = 'mark square coordinates with dots',
+        default = [], dest = 'dots', metavar = 'coord',
+        nargs = '+', type = str)
+
+    dots_options.add_argument('--dots-color',
+        help = 'color for the dot markers',
+        default = '#000000', dest = 'dots_color', metavar = 'color',
+        type = str)
+
+    dots_options.add_argument('--dots-disable',
+        help ='do not draw the dot markers',
+        action = 'store_const', dest = 'dots_disable',
+        const = True)
+
+
+    # optional
     # tileset options:
     tileset_options = parser.add_argument_group('tileset options')
 
@@ -547,6 +614,7 @@ def make_parser():
         help = 'do not draw tiles',
         action = 'store_const', dest = 'tileset_disable',
         const = True)
+
 
     return parser
 
