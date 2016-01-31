@@ -228,7 +228,7 @@ def piece_to_filename(piece):
     if piece.islower():
         return 'l' + filename
 
-    # many characters (such as '#', numbers, other unicode) will return False for both
+    # many characters (such as '#', other unicode) will return False for both
     # .isupper() and .islower():
     return filename
 
@@ -277,6 +277,46 @@ def load_tileset(board, folder):
                    .format(filepath, piece, err))
 
     return images
+
+
+# Generating tiles for crosses and dots:
+# (Pillow does not support antialiasing in ImageDraw)
+
+def generate_tile(tilesize, drawing_function, color, factor = 4):
+    """
+    Create a tile of 'factor' times the requested 'tilesize'
+    draw on it using 'function' and return an antialiased resized copy.
+    """
+    size = tilesize * factor
+    tile = Image.new('RGBA', (size, size))
+
+    draw = ImageDraw.Draw(tile)
+    drawing_function(draw, size, color)
+    del draw
+
+    return tile.resize((tilesize, tilesize), Image.ANTIALIAS)
+
+
+def draw_cross_tile(draw, size, color):
+    """ Draw an X tile for cross marks. """
+    offset = size // 3
+    length = size - offset
+    width  = size // 10
+
+    draw.line((offset, offset, length, length), fill = color, width = width)
+    draw.line((length, offset, offset, length), fill = color, width = width)
+
+
+def draw_dot_tile(draw, size, color):
+    """ Create a ellipse tile for dot marks. """
+    center = size // 2
+    radius = size // 6
+
+    # same coordinates for X and Y since it's a square:
+    start = center - radius
+    end = center + radius
+
+    draw.ellipse((start, start, end, end), fill = color)
 
 
 # Loading fonts:
@@ -429,6 +469,21 @@ def draw_checkerboard_pattern(image, x, y, board, tilesize, color1, color2):
             draw.rectangle([x1, y1, x2, y2], color2)
 
     del draw
+
+
+def draw_marks(image, x, y, board, tilesize, coords, color, drawing_function):
+    """
+    Draw crosses and dots on the given board coordinates.
+    """
+    tile = generate_tile(tilesize, drawing_function, color, factor = 4)
+    mask = tile.split()[3]
+
+    for col, row in parse_positions(coords, board):
+
+        x1 = x + (col * tilesize)
+        y1 = y + (row * tilesize)
+
+        image.paste(tile, (x1, y1), mask)
 
 
 def draw_pieces(image, x, y, board, tilesize, tileset):
@@ -615,7 +670,6 @@ def make_parser():
         action = 'store_const', dest = 'tileset_disable',
         const = True)
 
-
     return parser
 
 
@@ -772,6 +826,28 @@ def main():
                                    tilesize = tilesize,
                                      color1 = options.checkerboard_color1,
                                      color2 = options.checkerboard_color2)
+
+        # crosses:
+        if not options.crosses_disable:
+            draw_marks(image,
+                           x = outer_outline_size + border_size + inner_outline_size,
+                           y = outer_outline_size + border_size + inner_outline_size,
+                       board = board,
+                    tilesize = tilesize,
+                      coords = options.crosses,
+                       color = options.crosses_color,
+            drawing_function = draw_cross_tile)
+
+        # dots:
+        if not options.dots_disable:
+            draw_marks(image,
+                           x = outer_outline_size + border_size + inner_outline_size,
+                           y = outer_outline_size + border_size + inner_outline_size,
+                       board = board,
+                    tilesize = tilesize,
+                      coords = options.dots,
+                       color = options.dots_color,
+            drawing_function = draw_dot_tile)
 
         # tileset:
         if not options.tileset_disable:
