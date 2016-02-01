@@ -1,8 +1,18 @@
 #!/bin/bash
 
+# This is the script that generates all the Screenshots in the Tileboard README.
+# It's meant to be run from MSYS2.
+# Depends on both Tileboard (relative path) and ImageMagick (hardcoded to /c/ImageMagick).
+# There's zero error handling.
+
+
+# Draw a board with the given parameters:
+
 tileboard() {
     ../Source/Tileboard.py $@
 }
+
+# Put a label at the bottom left corner of an image:
 
 add_image_label_southwest() {
     /c/ImageMagick/convert   "$1" \
@@ -12,6 +22,7 @@ add_image_label_southwest() {
         -append "$1"
 }
 
+# Put a label at the bottom center of an image:
 
 add_image_label_center() {
     /c/ImageMagick/convert   "$1" \
@@ -22,6 +33,8 @@ add_image_label_center() {
         -append "$1"
 }
 
+# Put images side by side horizontally:
+
 combine_images_horizontally() {
     /c/ImageMagick/montage        \
         -background none          \
@@ -30,10 +43,12 @@ combine_images_horizontally() {
         -geometry +1 $@
 }
 
+# Put images side by side vertically:
+
 combine_images_vertically() {
     /c/ImageMagick/montage        \
         -background none          \
-        -tile x3                  \
+        -tile 1x                  \
         -gravity north            \
         -geometry +1 $@
 }
@@ -216,26 +231,26 @@ rm Screenshot6-{a,b}.png
 # Screenshot7:
 # Sizes:
 
-tileboard 111/1r1/111 Screenshot7-a.png                                                 \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+tileboard 111/1r1/111 Screenshot7-a.png                                  \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
     --tileset-folder ../Source/Tiles/merida/28
 
 add_image_label_center Screenshot7-a.png "28px"
 
-tileboard 111/1b1/111 Screenshot7-b.png                                                 \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+tileboard 111/1b1/111 Screenshot7-b.png                                  \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
     --tileset-folder ../Source/Tiles/merida/36
 
 add_image_label_center Screenshot7-b.png "36px"
 
-tileboard 111/1n1/111 Screenshot7-c.png                                                 \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+tileboard 111/1n1/111 Screenshot7-c.png                                  \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
     --tileset-folder ../Source/Tiles/merida/52
 
 add_image_label_center Screenshot7-c.png "52px"
 
-tileboard 111/1k1/111 Screenshot7-d.png                                                 \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+tileboard 111/1k1/111 Screenshot7-d.png                                  \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
     --tileset-folder ../Source/Tiles/merida/88
 
 add_image_label_center Screenshot7-d.png "88px"
@@ -248,25 +263,25 @@ rm Screenshot7-{a,b,c,d}.png
 # Tilesets:
 
 # alpha:
-tileboard rnbqkpRNBQKP Screenshot8-a.png                                               \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf                            \
-    --tileset-folder ../Source/Tiles/alpha/52                                          \
+tileboard rnbqkpRNBQKP Screenshot8-a.png                                       \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                    \
+    --tileset-folder ../Source/Tiles/alpha/52                                  \
     --border-disable
 
 add_image_label_center Screenshot8-a.png "--tileset-folder Tiles/alpha/52"
 
 # merida:
-tileboard rnbqkpRNBQKP Screenshot8-b.png                                                \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
-    --tileset-folder ../Source/Tiles/merida/52                                          \
+tileboard rnbqkpRNBQKP Screenshot8-b.png                                       \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                    \
+    --tileset-folder ../Source/Tiles/merida/52                                 \
     --border-disable
 
 add_image_label_center Screenshot8-b.png "--tileset-folder Tiles/merida/52"
 
 # usf:
-tileboard rnbqkpRNBQKP Screenshot8-c.png                                                \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
-    --tileset-folder ../Source/Tiles/usf/52                                             \
+tileboard rnbqkpRNBQKP Screenshot8-c.png                                       \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                    \
+    --tileset-folder ../Source/Tiles/usf/52                                    \
     --border-disable
 
 add_image_label_center Screenshot8-c.png "--tileset-folder Tiles/usf/52"
@@ -274,5 +289,31 @@ add_image_label_center Screenshot8-c.png "--tileset-folder Tiles/usf/52"
 combine_images_vertically Screenshot8-{a,b,c}.png Screenshot8.png
 rm Screenshot8-{a,b,c}.png
 
+
+# Screenshot9:
+# Beyond chess:
+
+# checkers:
+tileboard 1w1w1w1w/w1w1w1w1/1w1w1w1w/8/8/b1b1b1b1/1b1b1b1b/b1b1b1b1 Screenshot9-a.png \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                           \
+    --tileset-folder checkers
+
+add_image_label_center Screenshot9-a.png "Checkers"
+
+# lines of action:
+tileboard 1bbbbbb1/w6w/w6w/w6w/w6w/w6w/w6w/1bbbbbb1 Screenshot9-b.png                 \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                           \
+    --tileset-folder checkers
+
+add_image_label_center Screenshot9-b.png "Lines of action"
+
+combine_images_horizontally Screenshot9-{a,b}.png Screenshot9.png
+rm Screenshot9-{a,b}.png
+
+
+# Done:
+# Move to the Screenshots folder:
+
 cp *.png ../Screenshot
+rm *.png
 
