@@ -182,13 +182,26 @@ tileboard rnbqkbnrRNQKNRrnqknrRNBQKBNR/ppppppppPPPPPPppppppPPPPPPPP/9991/9991/99
 
 add_image_label_center Screenshot5.png "28x10"
 
+
 # Screenshot6:
-# Irregular boards, Cam:
-tileboard 0001/003/05/2n1n2/1ppppp1/7/7/7/1PPPPP1/2N1N2/05/003/0001 Screenshot6.png \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf                         \
-    --tileset-folder ../Source/Tiles/merida/30                                      \
+# Irregular boards:
+
+# Cam:
+tileboard 0001/003/05/2n1n2/1ppppp1/7/7/7/1PPPPP1/2N1N2/05/003/0001 Screenshot6-a.png \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                           \
+    --tileset-folder ../Source/Tiles/merida/30                                        \
     --dots D1 D13
 
-add_image_label_center Screenshot6.png "Cam"
+add_image_label_center Screenshot6-a.png "Cam"
+
+# Amazons:
+tileboard 303Q2/1q1005/30Q5/100002q2/0070/4q5/201Q5/4q5/2001103/401Q3 Screenshot6-b.png \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+    --tileset-folder ../Source/Tiles/merida/30                                          \
+
+add_image_label_center Screenshot6-b.png "Amazons (the board changes while playing)"
+
+combine_images_horizontally Screenshot6-a.png Screenshot6-b.png Screenshot6.png
+rm Screenshot6-a.png Screenshot6-b.png
 
 cp *.png ../Screenshot
