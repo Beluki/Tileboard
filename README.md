@@ -69,6 +69,20 @@ irregular boards:
 
 ![Screenshot6](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot6.png)
 
+Note: you can skip trailing zeros in a given position. For example the positions `00ppp0000`
+and `00ppp` are identical.
+
+## Sizes
+
+The final image size depends on the size of each piece in the board. Tileboard can use any size
+as long as all the pieces are squares of the same size. The short version is: it can generate
+small images for your blog or huge images that won't even fit on a monitor.
+
+Everything else in the image, such as coordinates, the outlines, crosses and dots or the borders
+is scaled automatically:
+
+![Screenshot7](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot7.png)
+
 ## Status
 
 This program is finished!

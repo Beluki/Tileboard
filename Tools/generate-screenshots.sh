@@ -90,8 +90,8 @@ add_image_label_southwest Screenshot2-c.png "
     --border-font-color '#8D7966'
 "
 
-combine_images_horizontally Screenshot2-a.png Screenshot2-b.png Screenshot2-c.png Screenshot2.png
-rm Screenshot2-a.png Screenshot2-b.png Screenshot2-c.png
+combine_images_horizontally Screenshot2-{a,b,c}.png Screenshot2.png
+rm Screenshot2-{a,b,c}.png
 
 
 # Screenshot3:
@@ -135,8 +135,8 @@ add_image_label_southwest Screenshot3-c.png "
     --crosses-color darkred
 "
 
-combine_images_horizontally Screenshot3-a.png Screenshot3-b.png Screenshot3-c.png Screenshot3.png
-rm Screenshot3-a.png Screenshot3-b.png Screenshot3-c.png
+combine_images_horizontally Screenshot3-{a,b,c}.png Screenshot3.png
+rm Screenshot3-{a,b,c}.png
 
 
 # Screenshot4:
@@ -170,8 +170,8 @@ tileboard rnqnr/ppppp/5/5/5/PPPPP/RNQNR Screenshot4-d.png                \
 
 add_image_label_center Screenshot4-d.png "Duchess"
 
-combine_images_horizontally Screenshot4-a.png Screenshot4-b.png Screenshot4-c.png Screenshot4-d.png Screenshot4.png
-rm Screenshot4-a.png Screenshot4-b.png Screenshot4-c.png Screenshot4-d.png
+combine_images_horizontally Screenshot4-{a,b,c,d}.png Screenshot4.png
+rm Screenshot4-{a,b,c,d}.png
 
 
 # Screenshot5:
@@ -201,7 +201,40 @@ tileboard 303Q2/1q1005/30Q5/100002q2/0070/4q5/201Q5/4q5/2001103/401Q3 Screenshot
 
 add_image_label_center Screenshot6-b.png "Amazons (the board changes while playing)"
 
-combine_images_horizontally Screenshot6-a.png Screenshot6-b.png Screenshot6.png
-rm Screenshot6-a.png Screenshot6-b.png
+combine_images_horizontally Screenshot6-{a,b}.png Screenshot6.png
+rm Screenshot6-{a,b}.png
+
+
+# Screenshot7:
+# Sizes:
+
+tileboard 111/1r1/111 Screenshot7-a.png                                                 \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+    --tileset-folder ../Source/Tiles/merida/28
+
+add_image_label_center Screenshot7-a.png "28px"
+
+tileboard 111/1b1/111 Screenshot7-b.png                                                 \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+    --tileset-folder ../Source/Tiles/merida/36
+
+add_image_label_center Screenshot7-b.png "36px"
+
+tileboard 111/1n1/111 Screenshot7-c.png                                                 \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+    --tileset-folder ../Source/Tiles/merida/52
+
+add_image_label_center Screenshot7-c.png "52px"
+
+tileboard 111/1k1/111 Screenshot7-d.png                                                 \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+    --tileset-folder ../Source/Tiles/merida/88
+
+add_image_label_center Screenshot7-d.png "88px"
+
+
+combine_images_horizontally Screenshot7-{a,b,c,d}.png Screenshot7.png
+rm Screenshot7-{a,b,c,d}.png
 
 cp *.png ../Screenshot
+
