@@ -60,6 +60,11 @@ As well as a (completely made-up) board that goes beyond 'z' and '9' in the bord
 
 ![Screenshot5](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot5.png)
 
+Another interesting addition to the FEN notation is that you can use zeros to represent holes
+in the board. This makes it possible to draw games such as [Camelot or Cam][] which use irregular
+boards.
+
+![Screenshot6](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot6.png)
 
 ## Status
 
