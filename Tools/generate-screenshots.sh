@@ -92,3 +92,46 @@ add_image_label_southwest Screenshot2-c.png "
 combine_images_horizontally Screenshot2-a.png Screenshot2-b.png Screenshot2-c.png Screenshot2.png
 
 
+# Screenshot3:
+# Dots and crosses:
+
+# knight moves:
+tileboard 8/8/8/8/3n4/8/8/8 Screenshot3-a.png                            \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
+    --tileset-folder ../Source/Tiles/merida/30                           \
+    --dots B5 B3 C6 C2 E6 E2 F5 F3
+
+add_image_label_southwest Screenshot3-a.png "
+    --dots B5 B3 C6 C2 E6 E2 F5 F3
+"
+
+# pawn moves:
+tileboard 8/8/8/8/8/8/3P4/8 Screenshot3-b.png                            \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
+    --tileset-folder ../Source/Tiles/merida/30                           \
+    --dots D3 D4                                                         \
+    --crosses C3 E3
+
+add_image_label_southwest Screenshot3-b.png "
+    --dots D3 D4
+    --crosses C3 E3
+"
+
+# king moves with check:
+tileboard 7K/5k2/8/8/6q1/8/8/8 Screenshot3-c.png                         \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
+    --tileset-folder ../Source/Tiles/merida/30                           \
+    --dots H7                                                            \
+    --dots-color green                                                   \
+    --crosses G7 G8                                                      \
+    --crosses-color darkred
+
+add_image_label_southwest Screenshot3-c.png "
+    --dots H7
+    --dots-color green
+    --crosses G7 G8
+    --crosses-color darkred
+"
+
+combine_images_horizontally Screenshot3-a.png Screenshot3-b.png Screenshot3-c.png Screenshot3.png
+

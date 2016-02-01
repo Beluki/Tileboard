@@ -43,6 +43,11 @@ are copied from one of my favorite chess programs, [Lucas Chess][].
 
 ![Screenshot2](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot2.png)
 
+To mark interesting positions, available piece moves, or other situations on the board
+you can place dots and crosses in any given coordinates:
+
+![Screenshot3](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot3.png)
+
 ## Status
 
 This program is finished!
