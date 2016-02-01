@@ -16,7 +16,7 @@ add_image_label_southwest() {
 add_image_label_center() {
     /c/ImageMagick/convert   "$1" \
         -background none          \
-        -gravity center           \
+        -gravity south            \
         -font Consolas label:"$2" \
         -append "$1"
 }
@@ -90,6 +90,7 @@ add_image_label_southwest Screenshot2-c.png "
 "
 
 combine_images_horizontally Screenshot2-a.png Screenshot2-b.png Screenshot2-c.png Screenshot2.png
+rm Screenshot2-a.png Screenshot2-b.png Screenshot2-c.png
 
 
 # Screenshot3:
@@ -134,4 +135,61 @@ add_image_label_southwest Screenshot3-c.png "
 "
 
 combine_images_horizontally Screenshot3-a.png Screenshot3-b.png Screenshot3-c.png Screenshot3.png
+rm Screenshot3-a.png Screenshot3-b.png Screenshot3-c.png
 
+
+# Screenshot4:
+# Small chess variants:
+
+# Gardner:
+tileboard rnbqk/ppppp/5/PPPPP/RNBQK Screenshot4-a.png                    \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
+    --tileset-folder ../Source/Tiles/merida/30
+
+add_image_label_center Screenshot4-a.png "
+    Gardner 5x5
+"
+
+# MinitChess:
+tileboard kqbnr/ppppp/5/5/PPPPP/RNBQK Screenshot4-b.png                  \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
+    --tileset-folder ../Source/Tiles/merida/30
+
+add_image_label_center Screenshot4-b.png "
+    MinitChess 5x6
+"
+
+# Los Alamos:
+tileboard rnqknr/pppppp/6/6/PPPPPP/RNQKNR Screenshot4-c.png              \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
+    --tileset-folder ../Source/Tiles/merida/30
+
+add_image_label_center Screenshot4-c.png "
+    Los Alamos 6x6
+"
+
+# Duchess:
+tileboard rnqnr/ppppp/5/5/5/PPPPP/RNQNR Screenshot4-d.png                \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
+    --tileset-folder ../Source/Tiles/merida/30
+
+add_image_label_center Screenshot4-d.png "
+    Duchess
+"
+
+combine_images_horizontally Screenshot4-a.png Screenshot4-b.png Screenshot4-c.png Screenshot4-d.png Screenshot4.png
+rm Screenshot4-a.png Screenshot4-b.png Screenshot4-c.png Screenshot4-d.png
+
+
+# Screenshot5:
+# Big board:
+tileboard rnbqkbnrRNQKNRrnqknrRNBQKBNR/ppppppppPPPPPPppppppPPPPPPPP/9991/9991/9991/9991/9991/9991/PPPPPPPPppppppPPPPPPpppppppp/RNBQKBNRrnqknrRNQKNRrnbqkbnr Screenshot5.png \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
+    --tileset-folder ../Source/Tiles/merida/30
+
+add_image_label_center Screenshot5.png "
+    28x10
+"
+
+
+cp *.png ../Screenshot

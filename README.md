@@ -48,6 +48,19 @@ you can place dots and crosses in any given coordinates:
 
 ![Screenshot3](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot3.png)
 
+The FEN notation is extended in various useful ways. For example, you can use any number
+of board rows or columns instead of 8x8. From 1x1 up to any size. It's also possible to
+use a different number of rows and columns.
+
+Here are some small chess variants:
+
+![Screenshot4](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot4.png)
+
+As well as a (completely made-up) board that goes beyond 'z' and '9' in the borders:
+
+![Screenshot5](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot5.png)
+
+
 ## Status
 
 This program is finished!
