@@ -26,6 +26,23 @@ Python 2.x is not supported.
 
 [Pillow 3.1.0]: https://pypi.python.org/pypi/Pillow/3.1.0
 
+## Features
+
+Although the basic syntax is: `Tileboard.py position filepath`, Tileboard
+has a metric ton of command-line options to customize the output.
+
+Instead of a boring list (see --help), I'll just put example screenshots in the readme
+with the command-line options that generated them.
+
+## Examples
+
+Let's start with pretty colors. Tileboard is easily themable. The following colors
+are copied from one of my favorite chess programs, [Lucas Chess][].
+
+[Lucas Chess]: https://www-lucaschess.rhcloud.com/index.html
+
+![Screenshot2](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot2.png)
+
 ## Status
 
 This program is finished!
