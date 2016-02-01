@@ -72,7 +72,7 @@ irregular boards:
 Note: you can skip trailing zeros in a given position. For example the positions `00ppp0000`
 and `00ppp` are identical.
 
-## Sizes
+## Sizes and tilesets
 
 The final image size depends on the size of each piece in the board. Tileboard can use any size
 as long as all the pieces are squares of the same size. The short version is: it can generate
@@ -82,6 +82,13 @@ Everything else in the image, such as coordinates, the outlines, crosses and dot
 is scaled automatically:
 
 ![Screenshot7](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot7.png)
+
+Included in the distribution are three high-quality tilesets for chess, with sizes ranging
+from 20x20 px to 300x300 px made by Eric de Mund for the Jin chess program.
+
+They look like this:
+
+![Screenshot8](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot8.png)
 
 ## Status
 

@@ -30,6 +30,14 @@ combine_images_horizontally() {
         -geometry +1 $@
 }
 
+combine_images_vertically() {
+    /c/ImageMagick/montage        \
+        -background none          \
+        -tile x3                  \
+        -gravity north            \
+        -geometry +1 $@
+}
+
 
 # Screenshot1:
 # Regular chess:
@@ -232,9 +240,39 @@ tileboard 111/1k1/111 Screenshot7-d.png                                         
 
 add_image_label_center Screenshot7-d.png "88px"
 
-
 combine_images_horizontally Screenshot7-{a,b,c,d}.png Screenshot7.png
 rm Screenshot7-{a,b,c,d}.png
+
+
+# Screenshot8:
+# Tilesets:
+
+# alpha:
+tileboard rnbqkpRNBQKP Screenshot8-a.png                                               \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                            \
+    --tileset-folder ../Source/Tiles/alpha/52                                          \
+    --border-disable
+
+add_image_label_center Screenshot8-a.png "--tileset-folder Tiles/alpha/52"
+
+# merida:
+tileboard rnbqkpRNBQKP Screenshot8-b.png                                                \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+    --tileset-folder ../Source/Tiles/merida/52                                          \
+    --border-disable
+
+add_image_label_center Screenshot8-b.png "--tileset-folder Tiles/merida/52"
+
+# usf:
+tileboard rnbqkpRNBQKP Screenshot8-c.png                                                \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+    --tileset-folder ../Source/Tiles/usf/52                                             \
+    --border-disable
+
+add_image_label_center Screenshot8-c.png "--tileset-folder Tiles/usf/52"
+
+combine_images_vertically Screenshot8-{a,b,c}.png Screenshot8.png
+rm Screenshot8-{a,b,c}.png
 
 cp *.png ../Screenshot
 
