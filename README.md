@@ -102,18 +102,22 @@ Tilesets in Tileboard are not hardcoded. They just follow a very simple rule.
 Each letter in a FEN position is translated to a filename, prepended with
 `l` or `u` depending on whether it's lowercase/uppercase in the position.
 
-For example, the `/Source/Tiles/merida/42` folder contains the files:
+For example, the [/Source/Tiles/merida/42][] folder contains the files:
 
 ```
 lb  lk  ln  lp  lq  lr  ub  uk  un  up  uq  ur
 ```
 
 If a letter has no different lowercase/uppercase representation (e.g: # or
-other unicode symbols), no prefix is needed.
+other unicode symbols), no prefix is needed. No extension either, because Pillow
+detects it (you can mix formats).
 
-Here are two examples (the tiles are included in the `Tools/checkers` folder):
+Here are two examples (the tiles are included in the [/Tools/checkers][] folder):
 
 ![Screenshot9](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot9.png)
+
+[/Source/Tiles/merida/42]: https://github.com/Beluki/Tileboard/tree/master/Source/Tiles/merida/42
+[/Tools/checkers]: https://github.com/Beluki/Tileboard/tree/master/Source/Tools/checkers
 
 ## Performance and memory usage
 
@@ -131,6 +135,15 @@ resulting in a 9040x9040 px image.
 ```bash
 $ Tileboard.py 8/8/8/8/8/8/8/8 blank.png --tileset-size 1000
 ```
+
+## Portability
+
+Information and error messages are written to stdout and stderr
+respectively, using the current platform newline format and encoding.
+
+The exit status is 0 on success and 1 on errors.
+
+Tileboard is tested on Windows 7 and 8 and on Debian (both x86 and x86-64).
 
 ## Status
 
