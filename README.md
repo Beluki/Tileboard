@@ -117,7 +117,7 @@ Here are two examples (the tiles are included in the [/Tools/checkers][] folder)
 ![Screenshot9](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot9.png)
 
 [/Source/Tiles/merida/42]: https://github.com/Beluki/Tileboard/tree/master/Source/Tiles/merida/42
-[/Tools/checkers]: https://github.com/Beluki/Tileboard/tree/master/Source/Tools/checkers
+[/Tools/checkers]: https://github.com/Beluki/Tileboard/tree/master/Tools/checkers
 
 ## Performance and memory usage
 
