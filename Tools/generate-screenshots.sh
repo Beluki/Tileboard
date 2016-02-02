@@ -50,7 +50,7 @@ combine_images_vertically() {
         -background none          \
         -tile 1x                  \
         -gravity north            \
-        -geometry +2 $@
+        -geometry +4 $@
 }
 
 
