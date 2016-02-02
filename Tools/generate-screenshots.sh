@@ -296,14 +296,14 @@ rm Screenshot8-{a,b,c}.png
 # checkers:
 tileboard 1w1w1w1w/w1w1w1w1/1w1w1w1w/8/8/b1b1b1b1/1b1b1b1b/b1b1b1b1 Screenshot9-a.png \
     --border-font ../Source/Font/LiberationMono-Regular.ttf                           \
-    --tileset-folder checkers
+    --tileset-folder checkers/40
 
 add_image_label_center Screenshot9-a.png "Checkers"
 
 # lines of action:
 tileboard 1bbbbbb1/w6w/w6w/w6w/w6w/w6w/w6w/1bbbbbb1 Screenshot9-b.png                 \
     --border-font ../Source/Font/LiberationMono-Regular.ttf                           \
-    --tileset-folder checkers
+    --tileset-folder checkers/40
 
 add_image_label_center Screenshot9-b.png "Lines of action"
 
