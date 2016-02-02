@@ -42,12 +42,12 @@ are copied from one of my favorite chess programs, [Lucas Chess][].
 
 [Lucas Chess]: https://www-lucaschess.rhcloud.com/index.html
 
-![Screenshot2](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot2.png)
+![Screenshot2](Screenshot/Screenshot2.png)
 
 To mark interesting positions, available piece moves, or other situations
 on the board you can place dots and crosses in any given coordinates:
 
-![Screenshot3](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot3.png)
+![Screenshot3](Screenshot/Screenshot3.png)
 
 The FEN notation is extended in various useful ways. For example, you can use
 any number of board rows or columns instead of 8x8. From 1x1 up to any size.
@@ -55,12 +55,12 @@ It's also possible to use a different number of rows and columns.
 
 Here are some small chess variants:
 
-![Screenshot4](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot4.png)
+![Screenshot4](Screenshot/Screenshot4.png)
 
 As well as a (completely made-up) board that
 goes beyond `z` and `9` in the borders:
 
-![Screenshot5](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot5.png)
+![Screenshot5](Screenshot/Screenshot5.png)
 
 Another interesting addition to the FEN notation is that you can use zeros
 to represent holes in the board. This makes it possible to draw games such
@@ -69,7 +69,7 @@ as [Cam][] or [Amazons][] which use irregular boards:
 [Cam]: http://www.worldcamelotfederation.com
 [Amazons]: https://en.wikipedia.org/wiki/Game_of_the_Amazons
 
-![Screenshot6](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot6.png)
+![Screenshot6](Screenshot6.png)
 
 Note: you can skip trailing zeros in a given position.
 For example the positions: `00ppp0000` and: `00ppp` are identical.
@@ -84,7 +84,7 @@ that won't even fit on a monitor.
 Everything else in the image, such as the outlines, border coordinates,
 the checkerboard or the crosses and dots is scaled automatically:
 
-![Screenshot7](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot7.png)
+![Screenshot7](Screenshot/Screenshot7.png)
 
 Included in the distribution are three high-quality tilesets for chess,
 with sizes ranging from 20x20 px to 300x300 px made by [Eric de Mund][] for the
@@ -94,7 +94,7 @@ Jin chess program.
 
 They look like this:
 
-![Screenshot8](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot8.png)
+![Screenshot8](Screenshot/Screenshot8.png)
 
 ## Beyond chess
 
@@ -114,10 +114,10 @@ detects it (you can mix formats).
 
 Here are two examples (the tiles are included in the [/Tools/checkers][] folder):
 
-![Screenshot9](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot9.png)
+![Screenshot9](Screenshot/Screenshot9.png)
 
-[/Source/Tiles/merida/42]: https://github.com/Beluki/Tileboard/tree/master/Source/Tiles/merida/42
-[/Tools/checkers]: https://github.com/Beluki/Tileboard/tree/master/Tools/checkers
+[/Source/Tiles/merida/42]: Source/Tiles/merida/42
+[/Tools/checkers]: Tools/checkers
 
 ## Performance and memory usage
 
@@ -157,5 +157,5 @@ I plan no further development on it other than maintenance.
 Like all my hobby projects, this is Free Software. See the [Documentation][]
 folder for more information. No warranty though.
 
-[Documentation]: https://github.com/Beluki/Tileboard/tree/master/Documentation
+[Documentation]: Documentation
 
