@@ -40,7 +40,7 @@ combine_images_horizontally() {
         -background none          \
         -tile x1                  \
         -gravity north            \
-        -geometry +1 $@
+        -geometry +2 $@
 }
 
 # Put images side by side vertically:
@@ -50,7 +50,7 @@ combine_images_vertically() {
         -background none          \
         -tile 1x                  \
         -gravity north            \
-        -geometry +1 $@
+        -geometry +2 $@
 }
 
 
