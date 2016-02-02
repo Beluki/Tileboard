@@ -15,7 +15,7 @@ $ Tileboard.py rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR chess.png
 
 Generates the following image:
 
-![Screenshot1](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot1.png)
+![Screenshot1](Screenshot/Screenshot1.png)
 
 ## Installation
 
