@@ -57,8 +57,8 @@ combine_images_vertically() {
 # Screenshot1:
 # Regular chess:
 
-tileboard rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR Screenshot1.png \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf           \
+tileboard rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR Screenshot1.png    \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
     --tileset-folder ../Source/Tiles/merida/42
 
 
@@ -66,12 +66,12 @@ tileboard rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR Screenshot1.png \
 # Colors:
 
 # excelsior:
-tileboard n1rb4/1p3p1p/1p6/1R5K/8/p3p1PN/1PP1R3/N6k Screenshot2-a.png \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf           \
-    --tileset-folder ../Source/Tiles/merida/30                        \
-    --checkerboard-color1 '#FDFFD5'                                   \
-    --checkerboard-color2 '#B3B174'                                   \
-    --border-color '#313100'                                          \
+tileboard n1rb4/1p3p1p/1p6/1R5K/8/p3p1PN/1PP1R3/N6k Screenshot2-a.png    \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf              \
+    --tileset-folder ../Source/Tiles/merida/30                           \
+    --checkerboard-color1 '#FDFFD5'                                      \
+    --checkerboard-color2 '#B3B174'                                      \
+    --border-color '#313100'                                             \
     --border-font-color '#FDFF98'
 
 add_image_label_southwest Screenshot2-a.png "
@@ -210,9 +210,9 @@ add_image_label_center Screenshot5.png "28x10"
 # Irregular boards:
 
 # Cam:
-tileboard 0001/003/05/2n1n2/1ppppp1/7/7/7/1PPPPP1/2N1N2/05/003/0001 Screenshot6-a.png \
-    --border-font ../Source/Font/LiberationMono-Regular.ttf                           \
-    --tileset-folder ../Source/Tiles/merida/30                                        \
+tileboard 0001/003/05/2n1n2/1ppppp1/7/7/7/1PPPPP1/2N1N2/05/003/0001 Screenshot6-a.png   \
+    --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
+    --tileset-folder ../Source/Tiles/merida/30                                          \
     --dots D1 D13
 
 add_image_label_center Screenshot6-a.png "Cam"
@@ -220,7 +220,7 @@ add_image_label_center Screenshot6-a.png "Cam"
 # Amazons:
 tileboard 303Q2/1q1005/30Q5/100002q2/0070/4q5/201Q5/4q5/2001103/401Q3 Screenshot6-b.png \
     --border-font ../Source/Font/LiberationMono-Regular.ttf                             \
-    --tileset-folder ../Source/Tiles/merida/30                                          \
+    --tileset-folder ../Source/Tiles/merida/30
 
 add_image_label_center Screenshot6-b.png "Amazons (the board changes while playing)"
 

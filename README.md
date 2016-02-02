@@ -58,7 +58,7 @@ Here are some small chess variants:
 ![Screenshot4](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot4.png)
 
 As well as a (completely made-up) board that
-goes beyond 'z' and '9' in the borders:
+goes beyond `z` and `9` in the borders:
 
 ![Screenshot5](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot5.png)
 
@@ -72,7 +72,7 @@ as [Cam][] or [Amazons][] which use irregular boards:
 ![Screenshot6](https://raw.github.com/Beluki/Tileboard/master/Screenshot/Screenshot6.png)
 
 Note: you can skip trailing zeros in a given position.
-For example the positions `00ppp0000` and `00ppp` are identical.
+For example the positions: `00ppp0000` and: `00ppp` are identical.
 
 ## Sizes and tilesets
 
@@ -126,10 +126,10 @@ Internally, Tileboard draws everything using offsets on a single image.
 It caches pieces, dots and crosses.
 
 In practice, this means that on a decent machine you can draw huge images
-without issues. I've used it to draw at resolutions up to more than 20000x200000 px.
+without issues. I've used it to draw at resolutions up to more than 20.000x20.000 px.
 
 As a guideline, generating a blank board at 1000x1000 px each tile
-takes 3 seconds on an Intel i5 3.5ghz and needs about 400 mb of memory
+takes 3 seconds on an Intel i5 3.5 ghz and needs about 400 mb of memory
 resulting in a 9040x9040 px image.
 
 ```bash
