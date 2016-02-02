@@ -69,7 +69,7 @@ as [Cam][] or [Amazons][] which use irregular boards:
 [Cam]: http://www.worldcamelotfederation.com
 [Amazons]: https://en.wikipedia.org/wiki/Game_of_the_Amazons
 
-![Screenshot6](Screenshot6.png)
+![Screenshot6](Screenshot/Screenshot6.png)
 
 Note: you can skip trailing zeros in a given position.
 For example the positions: `00ppp0000` and: `00ppp` are identical.
