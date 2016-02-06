@@ -193,7 +193,7 @@ tileboard rnqnr/ppppp/5/5/5/PPPPP/RNQNR Screenshot4-d.png                \
     --border-font ../Source/Font/LiberationMono-Regular.ttf              \
     --tileset-folder ../Source/Tiles/merida/30
 
-add_image_label_center Screenshot4-d.png "Duchess"
+add_image_label_center Screenshot4-d.png "Duchess 5x7"
 
 combine_images_horizontally Screenshot4-{a,b,c,d}.png Screenshot4.png
 rm Screenshot4-{a,b,c,d}.png
