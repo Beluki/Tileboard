@@ -127,6 +127,8 @@ in the [/Tools/freegemas][] folder):
 
 ![Screenshot10](Screenshot/Screenshot10.png)
 
+[/Tools/freegemas]: Tools/freegemas
+
 ## Performance and memory usage
 
 The only limitation on how big the output image can be is the memory available.
@@ -144,6 +146,20 @@ resulting in a 9040x9040 px image.
 ```bash
 $ Tileboard.py 8/8/8/8/8/8/8/8 blank.png --tileset-size 1000
 ```
+
+## Tileboard + ImageMagick
+
+I deliberately avoided adding features that would bloat the program if they
+could be done in a single command in [ImageMagick][]. One such example is text
+below the images (e.g. "White to play and win").
+
+[ImageMagick]: http://imagemagick.org
+
+Almost all of the images in this README have labels below them. Take a look
+at [generate-screenshots.sh][] for the script that generated them. I'm not
+proficient in either bash or ImageMagick but it worked fine.
+
+[generate-screenshots-sh]: Tools/generate-screenshots.sh
 
 ## Portability
 
