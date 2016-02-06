@@ -313,6 +313,18 @@ combine_images_horizontally Screenshot9-{a,b}.png Screenshot9.png
 rm Screenshot9-{a,b}.png
 
 
+# Screenshot10:
+# Other games:
+
+# freegemas:
+tileboard ygrpgowb/bopgwrrb/bbgrrwgw/wgrbpyww/wwopypgy/gwpbwrbo/gyopygrb/rgwwygpg Screenshot10.png \
+    --outer-outline-color '#735A4C'                                                                \
+    --checkerboard-color1 '#A5806B'                                                                \
+    --checkerboard-color2 '#8E6E61'                                                                \
+    --tileset-folder freegemas                                                                     \
+    --border-disable
+
+
 # Done:
 # Move to the Screenshots folder:
 

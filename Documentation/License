@@ -17,9 +17,17 @@ because it contains tilesets authored by Eric De Mund for the JIN chess program:
     <http://ixian.com/chess/jin-piece-sets/>
 
 
-Finally, the TrueType font, Liberation Mono:
+The TrueType font, Liberation Mono:
     </Source/Font/LiberationMono-Regular.ttf>
 
 is distributed under a SIL Open Font License, which can be found here:
     <http://scripts.sil.org/OFL>
+
+
+Finally, the following folder:
+    </Tools/freegemas/*>
+
+is distributed under the GNU GENERAL PUBLIC LICENSE, version 2
+since it's derived from the FreeGemas game tiles:
+    <https://github.com/JoseTomasTocino/freegemas>
 

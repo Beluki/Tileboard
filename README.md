@@ -121,6 +121,12 @@ Here are two examples (the tiles are included in the [/Tools/checkers][] folder)
 [/Source/Tiles/merida/42]: Source/Tiles/merida/42
 [/Tools/checkers]: Tools/checkers
 
+In fact, you can think of Tileboard as a paint program that draws sprites instead
+of pixels, with a single layer. Here's a more crazy example (the tiles are included
+in the [/Tools/freegemas][] folder):
+
+![Screenshot10](Screenshot/Screenshot10.png)
+
 ## Performance and memory usage
 
 The only limitation on how big the output image can be is the memory available.
