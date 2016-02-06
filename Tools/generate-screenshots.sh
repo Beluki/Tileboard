@@ -321,7 +321,7 @@ tileboard ygrpgowb/bopgwrrb/bbgrrwgw/wgrbpyww/wwopypgy/gwpbwrbo/gyopygrb/rgwwygp
     --outer-outline-color '#735A4C'                                                                \
     --checkerboard-color1 '#A5806B'                                                                \
     --checkerboard-color2 '#8E6E61'                                                                \
-    --tileset-folder freegemas                                                                     \
+    --tileset-folder freegemas/65                                                                  \
     --border-disable
 
 
