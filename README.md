@@ -21,7 +21,7 @@ Generates the following image:
 
 I've used Python 3.5.0 and [Pillow 3.1.0][] to develop Tileboard.
 It's likely that it will work with older versions of Python 3.x
-(back to 3.3 or so) or Pillow 2.x.
+(back to 3.3 or so) or with Pillow 2.x.
 
 Python 2.x is not supported.
 
@@ -72,7 +72,8 @@ as [Cam][] or [Amazons][] which use irregular boards:
 ![Screenshot6](Screenshot/Screenshot6.png)
 
 Note: you can skip trailing zeros in a given position.
-For example the positions: `00ppp0000` and: `00ppp` are identical.
+For example the positions: `00ppp0000` and: `00ppp` are identical when the
+board has 9 columns.
 
 ## Sizes and tilesets
 
@@ -126,7 +127,8 @@ Internally, Tileboard draws everything using offsets on a single image.
 It caches pieces, dots and crosses.
 
 In practice, this means that on a decent machine you can draw huge images
-without issues. I've used it to draw at resolutions up to more than 20.000x20.000 px.
+without issues. I've used it to draw at resolutions up to more than
+20.000x20.000 px.
 
 As a guideline, generating a blank board at 1000x1000 px each tile
 takes 3 seconds on an Intel i5 3.5 ghz and needs about 400 mb of memory
@@ -144,6 +146,8 @@ respectively, using the current platform newline format and encoding.
 The exit status is 0 on success and 1 on errors.
 
 Tileboard is tested on Windows 7 and 8 and on Debian (both x86 and x86-64).
+
+The tilesets and output images can use any format that Pillow supports.
 
 ## Status
 

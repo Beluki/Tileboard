@@ -2,7 +2,9 @@
 
 # This is the script that generates all the Screenshots in the Tileboard README.
 # It's meant to be run from MSYS2.
-# Depends on both Tileboard (relative path) and ImageMagick (hardcoded to /c/ImageMagick).
+
+# Depends on:  Tileboard (relative path)
+# and ImageMagick (hardcoded to /c/ImageMagick).
 # There's zero error handling.
 
 
