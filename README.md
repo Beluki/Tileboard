@@ -103,14 +103,15 @@ Tilesets in Tileboard are not hardcoded. They just follow a very simple rule.
 Each letter in a FEN position is translated to a filename, prepended with
 `l` or `u` depending on whether it's lowercase/uppercase in the position.
 
-For example, the [/Source/Tiles/merida/42][] folder contains the files:
+For example, the [/Source/Tiles/merida/42][] folder contains the files (those
+are just .png images without the extension):
 
 ```
 lb  lk  ln  lp  lq  lr  ub  uk  un  up  uq  ur
 ```
 
-If a letter has no different lowercase/uppercase representation (e.g: # or
-other unicode symbols), no prefix is needed. No extension either, because Pillow
+If a letter has no different lowercase/uppercase representation (e.g: `#` or
+unicode symbols), no prefix is needed. No extension either, because Pillow
 detects it (you can mix formats).
 
 Here are two examples (the tiles are included in the [/Tools/checkers][] folder):
