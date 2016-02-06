@@ -159,7 +159,7 @@ Almost all of the images in this README have labels below them. Take a look
 at [generate-screenshots.sh][] for the script that generated them. I'm not
 proficient in either bash or ImageMagick but it worked fine.
 
-[generate-screenshots-sh]: Tools/generate-screenshots.sh
+[generate-screenshots.sh]: Tools/generate-screenshots.sh
 
 ## Portability
 
